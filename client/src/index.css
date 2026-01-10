@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+  @apply bg-gray-50 min-h-screen text-gray-900 antialiased;
+}
+
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Clean Solid Utilities (Replacing Glass) */
+.glass {
+  @apply bg-white dark:bg-slate-800 border-none shadow-lg dark:shadow-slate-900/50;
+}
+
+.glass-card {
+  @apply bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
