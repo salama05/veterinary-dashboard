@@ -89,6 +89,11 @@ const Appointments: React.FC = () => {
         try {
             if (!selectedDate) return;
 
+            if (!formData.customerId) {
+                alert('الرجاء اختيار زبون للموعد');
+                return;
+            }
+
             // Combine selected date with time
             const dateStr = format(selectedDate, 'yyyy-MM-dd');
             const startDateTime = new Date(`${dateStr}T${formData.startTime}`);
@@ -112,9 +117,10 @@ const Appointments: React.FC = () => {
             setShowModal(false);
             fetchAppointments();
             resetForm();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving appointment:', error);
-            alert('حدث خطأ أثناء حفظ الموعد');
+            const message = error.response?.data?.message || 'حدث خطأ أثناء حفظ الموعد';
+            alert(message);
         }
     };
 
