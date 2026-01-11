@@ -52,21 +52,28 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/opening-stocks', openingStockRoutes);
 app.use('/api/consumed-products', consumedProductRoutes);
 
+// Debug route to verify deployment
+app.get('/debug-info', (req, res) => {
+    res.json({
+        status: 'online',
+        version: '6.0.0',
+        timestamp: new Date().toISOString(),
+        node_version: process.version,
+        env: process.env.NODE_ENV || 'not set'
+    });
+});
+
 // Serve static files from React build
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// Final SPA Fallback: Using a simple middleware to avoid any path-to-regexp issues
+// Final SPA Fallback
 app.use((req, res, next) => {
-    // If it's an API request, let it continue to 404
-    if (req.url.startsWith('/api')) {
-        return next();
-    }
-    // Otherwise, always serve index.html for the frontend
+    if (req.url.startsWith('/api')) return next();
     res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
         if (err) {
             console.error('FRONTEND ERROR:', err);
-            res.status(500).send('Frontend not found. Please check build logs.');
+            res.status(500).send(`Frontend not found. Path: ${clientBuildPath}`);
         }
     });
 });
@@ -74,7 +81,7 @@ app.use((req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
     console.log('*****************************************');
-    console.log(`🚀 SALAMA VET - VERSION 5 ACTIVE`);
+    console.log(`🚀 SALAMA VET - VERSION 6 ACTIVE`);
     console.log(`📍 Port: ${PORT}`);
     console.log('*****************************************');
 });
