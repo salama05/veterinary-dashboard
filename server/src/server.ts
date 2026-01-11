@@ -53,17 +53,12 @@ app.use('/api/opening-stocks', openingStockRoutes);
 app.use('/api/consumed-products', consumedProductRoutes);
 
 // Serve static files from React build
-const clientBuildPath = path.join(__dirname, '../../client/dist');
+const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// Auth and other API routes are already handled above
-
-// For any other route, serve React's index.html (Client-side routing support)
-app.get('(.*)', (req, res, next) => {
-    // Skip if the request starts with /api
-    if (req.path.startsWith('/api')) {
-        return next();
-    }
+// For any other route, serve React's index.html (SPA Fallback)
+// Using a regex to match all routes except those starting with /api
+app.get(/^((?!\/api).)*$/, (req, res) => {
     res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
