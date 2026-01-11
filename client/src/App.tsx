@@ -15,6 +15,7 @@ import Treatments from './pages/Treatments';
 import Inventory from './pages/Inventory';
 import OpeningStock from './pages/OpeningStock';
 import ConsumedProducts from './pages/ConsumedProducts';
+import Appointments from './pages/Appointments';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useContext(AuthContext)!;
@@ -43,6 +44,7 @@ function App() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="opening-stock" element={<OpeningStock />} />
         <Route path="consumed-products" element={<ConsumedProducts />} />
+        <Route path="appointments" element={<Appointments />} />
       </Route>
     </Routes>
   );

@@ -15,7 +15,8 @@ import {
     ChevronLeft,
     UserCircle,
     History,
-    ClipboardList
+    ClipboardList,
+    Calendar // Import Calendar icon
 } from 'lucide-react';
 
 const Layout = () => {
@@ -43,6 +44,7 @@ const Layout = () => {
         { name: 'الموردين', path: '/suppliers', icon: Users },
         { name: 'الزبائن', path: '/customers', icon: Contact },
         { name: 'المنتجات المستهلكة', path: '/consumed-products', icon: ClipboardList },
+        { name: 'المواعيد', path: '/appointments', icon: Calendar },
         { name: 'المخزون', path: '/inventory', icon: Warehouse },
     ];
 

@@ -60,6 +60,7 @@ import treatmentRoutes from './routes/treatmentRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import openingStockRoutes from './routes/openingStockRoutes';
 import consumedProductRoutes from './routes/consumedProductRoutes';
+import appointmentRoutes from './routes/appointmentRoutes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -71,6 +72,7 @@ app.use('/api/treatments', treatmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/opening-stocks', openingStockRoutes);
 app.use('/api/consumed-products', consumedProductRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Serve static files from React build
 // On Render, the process.cwd() is usually /opt/render/project/src/server
