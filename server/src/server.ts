@@ -1,10 +1,12 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
+import bcrypt from 'bcryptjs';
+import User from './models/User';
+import dotenv from 'dotenv';
+import helmet from 'helmet';
 
 dotenv.config();
 
@@ -20,7 +22,25 @@ app.use(morgan('dev'));
 // Database Connection
 const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/salama_vet';
 mongoose.connect(mongoURI)
-    .then(() => console.log('MongoDB Connected'))
+    .then(async () => {
+        console.log('MongoDB Connected');
+        // Auto-seed admin user if no users exist
+        try {
+            const userCount = await User.countDocuments();
+            if (userCount === 0) {
+                const salt = await bcrypt.genSalt(10);
+                const passwordHash = await bcrypt.hash('admin123', salt);
+                await User.create({
+                    username: 'admin',
+                    passwordHash,
+                    role: 'admin'
+                });
+                console.log('Default admin user created: admin / admin123');
+            }
+        } catch (seedErr) {
+            console.error('Error seeding admin user:', seedErr);
+        }
+    })
     .catch((err) => {
         console.error('MongoDB Connection Error:', err);
         console.error('Please ensure MongoDB is running and accessible at:', mongoURI);
@@ -52,19 +72,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/opening-stocks', openingStockRoutes);
 app.use('/api/consumed-products', consumedProductRoutes);
 
-// Debug route to verify deployment
-app.get('/debug-info', (req, res) => {
-    res.json({
-        status: 'online',
-        version: '6.0.0',
-        timestamp: new Date().toISOString(),
-        node_version: process.version,
-        env: process.env.NODE_ENV || 'not set'
-    });
-});
-
 // Serve static files from React build
-const clientBuildPath = path.resolve(__dirname, '../../client/dist');
+// On Render, the process.cwd() is usually /opt/render/project/src/server
+const clientBuildPath = path.join(process.cwd(), '../client/dist');
 app.use(express.static(clientBuildPath));
 
 // Final SPA Fallback
@@ -72,8 +82,8 @@ app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
     res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
         if (err) {
-            console.error('FRONTEND ERROR:', err);
-            res.status(500).send(`Frontend not found. Path: ${clientBuildPath}`);
+            console.error('FRONTEND ERROR at path:', clientBuildPath);
+            res.status(500).send(`Frontend build folder not found at: ${clientBuildPath}`);
         }
     });
 });
@@ -81,7 +91,7 @@ app.use((req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
     console.log('*****************************************');
-    console.log(`🚀 SALAMA VET - VERSION 6 ACTIVE`);
+    console.log(`🚀 SALAMA VET - VERSION 7 (FINAL) ACTIVE`);
     console.log(`📍 Port: ${PORT}`);
     console.log('*****************************************');
 });
