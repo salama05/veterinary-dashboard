@@ -11,12 +11,19 @@ const Treatments = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [search, setSearch] = useState('');
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        treatmentName: string;
+        customer: string;
+        quantity: number | '';
+        price: number | '';
+        paid: number | '';
+        date: string;
+    }>({
         treatmentName: '',
         customer: '',
-        quantity: 1,
-        price: 0,
-        paid: 0,
+        quantity: '',
+        price: '',
+        paid: '',
         date: new Date().toISOString().split('T')[0]
     });
     const [customAnimal, setCustomAnimal] = useState('');
@@ -46,7 +53,10 @@ const Treatments = () => {
         try {
             const treatmentData = {
                 ...formData,
-                treatmentName: formData.treatmentName === 'أخرى' ? customAnimal : formData.treatmentName
+                treatmentName: formData.treatmentName === 'أخرى' ? customAnimal : formData.treatmentName,
+                quantity: Number(formData.quantity) || 0,
+                price: Number(formData.price) || 0,
+                paid: Number(formData.paid) || 0
             };
             if (editingId) {
                 await api.put(`/treatments/${editingId}`, treatmentData);
@@ -58,9 +68,9 @@ const Treatments = () => {
             setFormData({
                 treatmentName: '',
                 customer: '',
-                quantity: 1,
-                price: 0,
-                paid: 0,
+                quantity: '',
+                price: '',
+                paid: '',
                 date: new Date().toISOString().split('T')[0]
             });
             setCustomAnimal('');
@@ -73,15 +83,22 @@ const Treatments = () => {
 
     const handleEdit = (treatment: any) => {
         setEditingId(treatment._id);
+        const animalTypes = ['أبقار', 'أغنام', 'ماعز', 'إبل', 'خيول', 'كلاب', 'قطط', 'طيور', 'دواجن', 'أرانب'];
+        const isCustom = !animalTypes.includes(treatment.treatmentName);
+
         setFormData({
-            treatmentName: treatment.treatmentName,
+            treatmentName: isCustom ? 'أخرى' : treatment.treatmentName,
             customer: treatment.customer?._id || treatment.customer,
             quantity: treatment.quantity,
             price: treatment.price,
             paid: treatment.paid,
             date: treatment.date ? new Date(treatment.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
         });
-        setCustomAnimal('');
+        if (isCustom) {
+            setCustomAnimal(treatment.treatmentName);
+        } else {
+            setCustomAnimal('');
+        }
         setIsModalOpen(true);
     };
 
@@ -102,8 +119,8 @@ const Treatments = () => {
         t.customer?.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const total = formData.quantity * formData.price;
-    const rest = total - formData.paid;
+    const total = (Number(formData.quantity) || 0) * (Number(formData.price) || 0);
+    const rest = total - (Number(formData.paid) || 0);
 
     return (
         <div>
@@ -125,9 +142,9 @@ const Treatments = () => {
                         setFormData({
                             treatmentName: '',
                             customer: '',
-                            quantity: 1,
-                            price: 0,
-                            paid: 0,
+                            quantity: '',
+                            price: '',
+                            paid: '',
                             date: new Date().toISOString().split('T')[0]
                         });
                         setCustomAnimal('');
@@ -280,7 +297,7 @@ const Treatments = () => {
                                 min="0.1"
                                 step="0.1"
                                 value={formData.quantity}
-                                onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, quantity: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -291,7 +308,7 @@ const Treatments = () => {
                                 required
                                 min="0"
                                 value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -304,7 +321,7 @@ const Treatments = () => {
                             required
                             min="0"
                             value={formData.paid}
-                            onChange={(e) => setFormData({ ...formData, paid: Number(e.target.value) })}
+                            onChange={(e) => setFormData({ ...formData, paid: e.target.value === '' ? '' : Number(e.target.value) })}
                             className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>

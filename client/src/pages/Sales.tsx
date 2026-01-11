@@ -12,12 +12,19 @@ const Sales = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [search, setSearch] = useState('');
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        product: string;
+        customer: string;
+        quantity: number | '';
+        price: number | '';
+        paid: number | '';
+        date: string;
+    }>({
         product: '',
         customer: '',
-        quantity: 1,
-        price: 0,
-        paid: 0,
+        quantity: '',
+        price: '',
+        paid: '',
         date: new Date().toISOString().split('T')[0]
     });
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -56,19 +63,26 @@ const Sales = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...formData,
+                quantity: Number(formData.quantity) || 0,
+                price: Number(formData.price) || 0,
+                paid: Number(formData.paid) || 0
+            };
+
             if (editingId) {
-                await api.put(`/sales/${editingId}`, formData);
+                await api.put(`/sales/${editingId}`, payload);
             } else {
-                await api.post('/sales', formData);
+                await api.post('/sales', payload);
             }
             setIsModalOpen(false);
             setEditingId(null);
             setFormData({
                 product: '',
                 customer: '',
-                quantity: 1,
-                price: 0,
-                paid: 0,
+                quantity: '',
+                price: '',
+                paid: '',
                 date: new Date().toISOString().split('T')[0]
             });
             fetchData();
@@ -108,8 +122,8 @@ const Sales = () => {
         s.customer?.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const total = formData.quantity * formData.price;
-    const rest = total - formData.paid;
+    const total = (Number(formData.quantity) || 0) * (Number(formData.price) || 0);
+    const rest = total - (Number(formData.paid) || 0);
 
     return (
         <div>
@@ -131,9 +145,9 @@ const Sales = () => {
                         setFormData({
                             product: '',
                             customer: '',
-                            quantity: 1,
-                            price: 0,
-                            paid: 0,
+                            quantity: '',
+                            price: '',
+                            paid: '',
                             date: new Date().toISOString().split('T')[0]
                         });
                         setIsModalOpen(true);
@@ -254,7 +268,7 @@ const Sales = () => {
                                 min="0"
                                 step="any"
                                 value={formData.quantity}
-                                onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, quantity: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -266,7 +280,7 @@ const Sales = () => {
                                 min="0"
                                 step="any"
                                 value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -280,7 +294,7 @@ const Sales = () => {
                             min="0"
                             step="any"
                             value={formData.paid}
-                            onChange={(e) => setFormData({ ...formData, paid: Number(e.target.value) })}
+                            onChange={(e) => setFormData({ ...formData, paid: e.target.value === '' ? '' : Number(e.target.value) })}
                             className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>

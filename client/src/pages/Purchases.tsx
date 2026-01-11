@@ -12,11 +12,18 @@ const Purchases = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [search, setSearch] = useState('');
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        product: string;
+        supplier: string;
+        quantity: number | '';
+        price: number | '';
+        expiryDate: string;
+        date: string;
+    }>({
         product: '',
         supplier: '',
-        quantity: 1,
-        price: 0,
+        quantity: '',
+        price: '',
         expiryDate: '',
         date: new Date().toISOString().split('T')[0]
     });
@@ -73,18 +80,24 @@ const Purchases = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...formData,
+                quantity: Number(formData.quantity) || 0,
+                price: Number(formData.price) || 0
+            };
+
             if (editingId) {
-                await api.put(`/purchases/${editingId}`, formData);
+                await api.put(`/purchases/${editingId}`, payload);
             } else {
-                await api.post('/purchases', formData);
+                await api.post('/purchases', payload);
             }
             setIsModalOpen(false);
             setEditingId(null);
             setFormData({
                 product: '',
                 supplier: '',
-                quantity: 1,
-                price: 0,
+                quantity: '',
+                price: '',
                 expiryDate: '',
                 date: new Date().toISOString().split('T')[0]
             });
@@ -98,6 +111,8 @@ const Purchases = () => {
         p.product?.name.toLowerCase().includes(search.toLowerCase()) ||
         p.supplier?.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const total = (Number(formData.quantity) || 0) * (Number(formData.price) || 0);
 
     return (
         <div>
@@ -237,7 +252,7 @@ const Purchases = () => {
                                 min="0"
                                 step="any"
                                 value={formData.quantity}
-                                onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, quantity: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -249,7 +264,7 @@ const Purchases = () => {
                                 min="0"
                                 step="any"
                                 value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -258,7 +273,7 @@ const Purchases = () => {
                     <div className="bg-gray-50 p-3 rounded-lg text-center">
                         <span className="text-gray-500 text-sm">الإجمالي: </span>
                         <span className="font-bold text-lg text-primary">
-                            {(formData.quantity * formData.price).toLocaleString()} د.ج
+                            {total.toLocaleString()} د.ج
                         </span>
                     </div>
 
