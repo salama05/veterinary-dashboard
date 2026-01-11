@@ -17,9 +17,16 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/salama_vet')
+const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/salama_vet';
+mongoose.connect(mongoURI)
     .then(() => console.log('MongoDB Connected'))
-    .catch((err) => console.error('MongoDB Connection Error:', err));
+    .catch((err) => {
+        console.error('MongoDB Connection Error:', err);
+        console.error('Please ensure MongoDB is running and accessible at:', mongoURI);
+    });
+
+// Favicon handler to stop 404 errors in logs
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Routes
 import authRoutes from './routes/authRoutes';
