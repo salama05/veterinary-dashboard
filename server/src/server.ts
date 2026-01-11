@@ -56,32 +56,19 @@ app.use('/api/consumed-products', consumedProductRoutes);
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// SPA Fallback: Serve index.html for any request that doesn't match a static file or API route
+// Final Fallback for React Router (SPA)
+// Using a generic middleware to avoid Express 5 wildcard issues
 app.use((req, res, next) => {
-    // If it's an API route that wasn't handled, send a 404
-    if (req.url.startsWith('/api')) {
-        return res.status(404).json({ message: `API route ${req.url} not found` });
+    // If it's an API request, let it fall through to 404 handler
+    if (req.originalUrl.startsWith('/api')) {
+        return next();
     }
-    // For everything else, serve index.html
-    res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
-        if (err) {
-            console.error('Error sending index.html:', err);
-            res.status(500).send('Error loading frontend. Please check server logs.');
-        }
-    });
-});
-
-// Final Error Handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('SERVER ERROR:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    // Otherwise, serve index.html
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // Start Server
 app.listen(PORT, () => {
-    console.log('=========================================');
-    console.log(`🚀 SALAMA VET SERVER v3 STARTING...`);
-    console.log(`📡 Port: ${PORT}`);
-    console.log(`📂 Frontend Path: ${clientBuildPath}`);
-    console.log('=========================================');
+    console.log(`🚀 Salama VET System Online on Port ${PORT}`);
+    console.log(`🌐 Application instance: ${process.env.RENDER_INSTANCE_ID || 'local'}`);
 });
