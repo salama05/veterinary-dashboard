@@ -56,22 +56,18 @@ app.use('/api/consumed-products', consumedProductRoutes);
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// For any other route (that doesn't match API or static files), serve index.html
-app.get('*', (req, res) => {
-    // Basic check to avoid serving index.html for API calls that 404
+// SPA Fallback: Serve index.html for any request that doesn't match a static file or API route
+app.use((req, res, next) => {
+    // If it's an API route that wasn't handled, send a 404
     if (req.url.startsWith('/api')) {
         return res.status(404).json({ message: `API route ${req.url} not found` });
     }
+    // For everything else, serve index.html
     res.sendFile(path.join(clientBuildPath, 'index.html'));
-});
-
-// 404 Handler for undefined routes
-app.use((req, res) => {
-    console.log(`404 error: ${req.method} ${req.url}`);
-    res.status(404).json({ message: `Route ${req.method} ${req.url} not found` });
 });
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server v2 running on port ${PORT}`);
+    console.log(`Serving frontend from: ${clientBuildPath}`);
 });
