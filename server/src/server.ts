@@ -56,19 +56,25 @@ app.use('/api/consumed-products', consumedProductRoutes);
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// Final Fallback for React Router (SPA)
-// Using a generic middleware to avoid Express 5 wildcard issues
+// Final SPA Fallback: Using a simple middleware to avoid any path-to-regexp issues
 app.use((req, res, next) => {
-    // If it's an API request, let it fall through to 404 handler
-    if (req.originalUrl.startsWith('/api')) {
+    // If it's an API request, let it continue to 404
+    if (req.url.startsWith('/api')) {
         return next();
     }
-    // Otherwise, serve index.html
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
+    // Otherwise, always serve index.html for the frontend
+    res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
+        if (err) {
+            console.error('FRONTEND ERROR:', err);
+            res.status(500).send('Frontend not found. Please check build logs.');
+        }
+    });
 });
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`🚀 Salama VET System Online on Port ${PORT}`);
-    console.log(`🌐 Application instance: ${process.env.RENDER_INSTANCE_ID || 'local'}`);
+    console.log('*****************************************');
+    console.log(`🚀 SALAMA VET - VERSION 5 ACTIVE`);
+    console.log(`📍 Port: ${PORT}`);
+    console.log('*****************************************');
 });
