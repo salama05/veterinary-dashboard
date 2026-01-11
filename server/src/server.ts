@@ -59,7 +59,7 @@ app.use(express.static(clientBuildPath));
 // Auth and other API routes are already handled above
 
 // For any other route, serve React's index.html (Client-side routing support)
-app.get('*', (req, res, next) => {
+app.get('(.*)', (req, res, next) => {
     // Skip if the request starts with /api
     if (req.path.startsWith('/api')) {
         return next();
