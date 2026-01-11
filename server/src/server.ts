@@ -56,9 +56,12 @@ app.use('/api/consumed-products', consumedProductRoutes);
 const clientBuildPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientBuildPath));
 
-// For any other route, serve React's index.html (SPA Fallback)
-// Using a regex to match all routes except those starting with /api
-app.get(/^((?!\/api).)*$/, (req, res) => {
+// For any other route (that doesn't match API or static files), serve index.html
+app.get('*', (req, res) => {
+    // Basic check to avoid serving index.html for API calls that 404
+    if (req.url.startsWith('/api')) {
+        return res.status(404).json({ message: `API route ${req.url} not found` });
+    }
     res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
