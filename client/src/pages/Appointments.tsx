@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import Sidebar from '../components/Sidebar';
 import SearchableSelect from '../components/SearchableSelect';
 import {
     format,
@@ -186,95 +185,92 @@ const Appointments: React.FC = () => {
     };
 
     return (
-        <div className="flex bg-gray-50 min-h-screen font-sans" dir="rtl">
-            <Sidebar />
-            <div className="flex-1 p-8 overflow-hidden flex flex-col h-screen">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                        <Clock className="w-8 h-8 text-blue-600" />
-                        جدول المواعيد
-                    </h1>
-                    <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm">
-                        <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
-                        </button>
-                        <span className="text-lg font-bold text-gray-700 w-40 text-center">
-                            {format(currentDate, 'MMMM yyyy', { locale: ar })}
-                        </span>
-                        <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                            <ChevronLeft className="w-5 h-5 text-gray-600" />
-                        </button>
-                    </div>
-                    <button
-                        onClick={() => handleDateClick(new Date())}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
-                    >
-                        <Plus className="w-5 h-5" />
-                        موعد جديد
+        <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                    <Clock className="w-8 h-8 text-blue-600" />
+                    جدول المواعيد
+                </h1>
+                <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm">
+                    <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <span className="text-lg font-bold text-gray-700 w-40 text-center">
+                        {format(currentDate, 'MMMM yyyy', { locale: ar })}
+                    </span>
+                    <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <ChevronLeft className="w-5 h-5 text-gray-600" />
                     </button>
                 </div>
+                <button
+                    onClick={() => handleDateClick(new Date())}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
+                >
+                    <Plus className="w-5 h-5" />
+                    موعد جديد
+                </button>
+            </div>
 
-                {/* Calendar Grid */}
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex-1 flex flex-col border border-gray-100">
-                    {/* Days Header */}
-                    <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
-                        {weekDays.map(day => (
-                            <div key={day} className="py-3 text-center text-gray-500 font-medium text-sm">
-                                {day}
-                            </div>
-                        ))}
-                    </div>
+            {/* Calendar Grid */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex-1 flex flex-col border border-gray-100 min-h-[600px]">
+                {/* Days Header */}
+                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+                    {weekDays.map(day => (
+                        <div key={day} className="py-3 text-center text-gray-500 font-medium text-sm">
+                            {day}
+                        </div>
+                    ))}
+                </div>
 
-                    {/* Days Cells */}
-                    <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-                        {days.map((day, dayIdx) => {
-                            const dayAppointments = appointments?.filter(apt =>
-                                isSameDay(parseISO(apt.date), day)
-                            );
+                {/* Days Cells */}
+                <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+                    {days.map((day, dayIdx) => {
+                        const dayAppointments = appointments?.filter(apt =>
+                            isSameDay(parseISO(apt.date), day)
+                        );
 
-                            return (
-                                <div
-                                    key={day.toString()}
-                                    onClick={() => handleDateClick(day)}
-                                    className={`
-                                        border-b border-l border-gray-100 p-2 min-h-[100px] cursor-pointer hover:bg-blue-50 transition-colors relative group
-                                        ${!isSameMonth(day, monthStart) ? 'bg-gray-50 text-gray-400' : 'bg-white'}
-                                        ${isToday(day) ? 'bg-blue-50/30' : ''}
-                                    `}
-                                >
-                                    <div className={`
-                                        text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full
-                                        ${isToday(day) ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700'}
-                                    `}>
-                                        {format(day, dateFormat)}
-                                    </div>
+                        return (
+                            <div
+                                key={day.toString()}
+                                onClick={() => handleDateClick(day)}
+                                className={`
+                                    border-b border-l border-gray-100 p-2 min-h-[100px] cursor-pointer hover:bg-blue-50 transition-colors relative group
+                                    ${!isSameMonth(day, monthStart) ? 'bg-gray-50 text-gray-400' : 'bg-white'}
+                                    ${isToday(day) ? 'bg-blue-50/30' : ''}
+                                `}
+                            >
+                                <div className={`
+                                    text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full
+                                    ${isToday(day) ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700'}
+                                `}>
+                                    {format(day, dateFormat)}
+                                </div>
 
-                                    <div className="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar">
-                                        {dayAppointments?.map(apt => (
-                                            <div
-                                                key={apt._id}
-                                                onClick={(e) => { e.stopPropagation(); openEditModal(apt); }}
-                                                className={`
-                                                    text-xs p-1.5 rounded-lg border flex items-center justify-between gap-1 shadow-sm hover:shadow-md transition-all
-                                                    ${getStatusColor(apt.status)}
-                                                `}
-                                            >
-                                                <span className="truncate font-medium">{format(parseISO(apt.date), 'HH:mm')} - {apt.customer.name}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Add Button visible on hover */}
-                                    <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="p-1 bg-white rounded-full shadow-sm text-blue-600 hover:text-blue-700">
-                                            <Plus className="w-4 h-4" />
+                                <div className="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar">
+                                    {dayAppointments?.map(apt => (
+                                        <div
+                                            key={apt._id}
+                                            onClick={(e) => { e.stopPropagation(); openEditModal(apt); }}
+                                            className={`
+                                                text-xs p-1.5 rounded-lg border flex items-center justify-between gap-1 shadow-sm hover:shadow-md transition-all
+                                                ${getStatusColor(apt.status)}
+                                            `}
+                                        >
+                                            <span className="truncate font-medium">{format(parseISO(apt.date), 'HH:mm')} - {apt.customer.name}</span>
                                         </div>
+                                    ))}
+                                </div>
+
+                                {/* Add Button visible on hover */}
+                                <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="p-1 bg-white rounded-full shadow-sm text-blue-600 hover:text-blue-700">
+                                        <Plus className="w-4 h-4" />
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
