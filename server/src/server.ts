@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
 
 dotenv.config();
 
@@ -51,9 +52,19 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/opening-stocks', openingStockRoutes);
 app.use('/api/consumed-products', consumedProductRoutes);
 
-// Basic Route
-app.get('/', (req, res) => {
-    res.send('Salama VET API is running');
+// Serve static files from React build
+const clientBuildPath = path.join(__dirname, '../../client/dist');
+app.use(express.static(clientBuildPath));
+
+// Auth and other API routes are already handled above
+
+// For any other route, serve React's index.html (Client-side routing support)
+app.get('*', (req, res, next) => {
+    // Skip if the request starts with /api
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // 404 Handler for undefined routes
