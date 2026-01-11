@@ -63,11 +63,25 @@ app.use((req, res, next) => {
         return res.status(404).json({ message: `API route ${req.url} not found` });
     }
     // For everything else, serve index.html
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
+    res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
+        if (err) {
+            console.error('Error sending index.html:', err);
+            res.status(500).send('Error loading frontend. Please check server logs.');
+        }
+    });
+});
+
+// Final Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('SERVER ERROR:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server v2 running on port ${PORT}`);
-    console.log(`Serving frontend from: ${clientBuildPath}`);
+    console.log('=========================================');
+    console.log(`🚀 SALAMA VET SERVER v3 STARTING...`);
+    console.log(`📡 Port: ${PORT}`);
+    console.log(`📂 Frontend Path: ${clientBuildPath}`);
+    console.log('=========================================');
 });
