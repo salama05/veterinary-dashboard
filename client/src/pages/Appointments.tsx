@@ -181,14 +181,13 @@ const Appointments: React.FC = () => {
         }
     };
 
-    const getStatusText = (status: string) => {
+    /* const getStatusText = (status: string) => {
         switch (status) {
-            case 'Confirmed': return 'مؤكد';
-            case 'Cancelled': return 'ملغى';
+            case 'Confirmed': return 'مؤكد';            case 'Cancelled': return 'ملغى';
             case 'Completed': return 'مكتمل';
             default: return 'قادم';
         }
-    };
+    }; */
 
     return (
         <div className="h-full flex flex-col">
@@ -231,7 +230,7 @@ const Appointments: React.FC = () => {
 
                 {/* Days Cells */}
                 <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-                    {days.map((day, dayIdx) => {
+                    {days.map((day) => {
                         const dayAppointments = appointments?.filter(apt =>
                             isSameDay(parseISO(apt.date), day)
                         );

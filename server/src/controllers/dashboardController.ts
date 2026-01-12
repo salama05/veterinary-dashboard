@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 import Sale from '../models/Sale';
 import Purchase from '../models/Purchase';
+import Appointment from '../models/Appointment';
 
 export const getDashboardStats = async (req: Request, res: Response) => {
     try {
@@ -31,7 +32,16 @@ export const getDashboardStats = async (req: Request, res: Response) => {
             expiryDate: { $lte: expiryWarningDate, $gte: today }
         }).limit(10);
 
-        // 3. Last Operations
+        // 3. Upcoming Appointments
+        const upcomingAppointments = await Appointment.find({
+            date: { $gte: today },
+            status: { $in: ['Scheduled', 'Confirmed'] }
+        })
+            .sort({ date: 1 })
+            .limit(5)
+            .populate('customer', 'name');
+
+        // 4. Last Operations
         const lastSales = await Sale.find().sort({ date: -1 }).limit(5).populate('product', 'name').populate('customer', 'name');
         const lastPurchases = await Purchase.find().sort({ date: -1 }).limit(5).populate('product', 'name').populate('supplier', 'name');
 
@@ -45,6 +55,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
                 lowStock: lowStockProducts,
                 expiring: expiringProducts
             },
+            appointments: upcomingAppointments,
             recent: {
                 sales: lastSales,
                 purchases: lastPurchases

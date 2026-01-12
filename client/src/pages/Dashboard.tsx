@@ -6,7 +6,8 @@ import {
     ShoppingCart,
     AlertTriangle,
     TrendingUp,
-    TrendingDown
+    TrendingDown,
+    Calendar
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -81,6 +82,53 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Upcoming Appointments */}
+                <div className="glass-card rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                            <div className="p-2 bg-indigo-100 rounded-lg">
+                                <Calendar className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <span>المواعيد القريبة</span>
+                        </h3>
+                        <span className="text-xs font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full">{stats.appointments?.length || 0} موعد</span>
+                    </div>
+
+                    <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700">
+                        <table className="w-full text-sm text-right">
+                            <thead className="bg-gray-50/50 dark:bg-gray-700/30 text-gray-500">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium">العميل</th>
+                                    <th className="px-4 py-3 font-medium">التاريخ</th>
+                                    <th className="px-4 py-3 font-medium">الخدمة</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                {stats.appointments?.map((apt: any) => (
+                                    <tr key={apt._id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-200">{apt.customer?.name}</td>
+                                        <td className="px-4 py-3 text-gray-500" dir="ltr">
+                                            <div className="flex items-center gap-2 justify-end">
+                                                <span>{new Date(apt.date).toLocaleDateString('en-GB')}</span>
+                                                <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{new Date(apt.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded-full text-xs">{apt.serviceType}</span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {(!stats.appointments || stats.appointments.length === 0) && (
+                                    <tr>
+                                        <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                                            لا توجد مواعيد قريبة 📅
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 {/* Low Stock Warning */}
                 <div className="glass-card rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-6">
