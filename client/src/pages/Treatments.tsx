@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import SearchableSelect from '../components/SearchableSelect';
+import ExportMenu from '../components/ExportMenu';
 
 const Treatments = () => {
     const [treatments, setTreatments] = useState<any[]>([]);
@@ -126,14 +127,31 @@ const Treatments = () => {
         <div>
             {loading && <div className="text-center p-4">جاري التحميل...</div>}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div className="relative w-full md:w-96 group">
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="بحث في العلاجات..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                <div className="flex gap-2 w-full md:w-auto items-center">
+                    <div className="relative w-full md:w-96 group">
+                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="بحث في العلاجات..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        />
+                    </div>
+                    <ExportMenu
+                        data={filteredTreatments}
+                        fileName="treatments"
+                        columns={[
+                            { key: 'date', label: 'التاريخ', formatter: (val) => new Date(val).toLocaleDateString('en-GB') },
+                            { key: 'treatmentName', label: 'اسم العلاج' },
+                            { key: 'customer.name', label: 'الزبون', formatter: (val) => val || 'محذوف' },
+                            { key: 'quantity', label: 'العدد' },
+                            { key: 'price', label: 'السعر' },
+                            { key: 'total', label: 'الإجمالي', formatter: (_, item) => item.total?.toLocaleString() || ((item.quantity || 0) * (item.price || 0)).toLocaleString() },
+                            { key: 'paid', label: 'المدفوع' },
+                            { key: 'rest', label: 'الباقي', formatter: (_, item) => item.rest?.toLocaleString() || ((item.quantity || 0) * (item.price || 0) - (item.paid || 0)).toLocaleString() }
+                        ]}
+                        label="تصدير"
                     />
                 </div>
                 <button

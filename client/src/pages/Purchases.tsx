@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import SearchableSelect from '../components/SearchableSelect';
+import ExportMenu from '../components/ExportMenu';
 
 const Purchases = () => {
     const [purchases, setPurchases] = useState<any[]>([]);
@@ -118,22 +119,49 @@ const Purchases = () => {
         <div>
             {loading && <div className="text-center p-4">جاري التحميل...</div>}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div className="relative w-full md:w-96 group">
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="بحث في المشتريات..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                <div className="flex gap-2 w-full md:w-auto items-center">
+                    <div className="relative w-full md:w-96 group">
+                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="بحث في المشتريات..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        />
+                    </div>
+                    <ExportMenu
+                        data={filteredPurchases}
+                        fileName="purchases"
+                        columns={[
+                            { key: 'date', label: 'التاريخ', formatter: (val) => new Date(val).toLocaleDateString('en-GB') },
+                            { key: 'product.name', label: 'المنتج', formatter: (val) => val || 'محذوف' },
+                            { key: 'supplier.name', label: 'المورد' },
+                            { key: 'quantity', label: 'العدد' },
+                            { key: 'price', label: 'السعر' },
+                            { key: 'total', label: 'الإجمالي', formatter: (_, item) => item.total?.toLocaleString() || ((item.quantity || 0) * (item.price || 0)).toLocaleString() },
+                            { key: 'expiryDate', label: 'الصلاحية', formatter: (val) => val ? new Date(val).toLocaleDateString('en-GB') : '-' }
+                        ]}
+                        label="تصدير"
                     />
                 </div>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                        setEditingId(null);
+                        setFormData({
+                            product: '',
+                            supplier: '',
+                            quantity: '',
+                            price: '',
+                            date: new Date().toISOString().split('T')[0],
+                            expiryDate: ''
+                        });
+                        setIsModalOpen(true);
+                    }}
                     className="w-full md:w-auto bg-gradient-to-r from-primary to-indigo-600 text-white px-6 py-3 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all duration-300 font-medium"
                 >
                     <Plus className="w-5 h-5 ml-2" />
-                    مشتريات جديدة
+                    شراء جديد
                 </button>
             </div>
 

@@ -17,6 +17,7 @@ import {
 } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Activity, FileText, X, Check, Trash2 } from 'lucide-react';
+import ExportMenu from '../components/ExportMenu';
 
 interface Appointment {
     _id: string;
@@ -207,6 +208,20 @@ const Appointments: React.FC = () => {
                     <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <ChevronLeft className="w-5 h-5 text-gray-600" />
                     </button>
+                    <div className="border-r border-gray-200 h-8 mx-2 hidden sm:block"></div>
+                    <ExportMenu
+                        data={appointments || []}
+                        fileName="appointments"
+                        columns={[
+                            { key: 'date', label: 'التاريخ', formatter: (val) => format(new Date(val), 'yyyy-MM-dd') },
+                            { key: 'date', label: 'الوقت', formatter: (val, item) => `${format(new Date(val), 'HH:mm')} - ${format(new Date(item.endTime), 'HH:mm')}` },
+                            { key: 'customer.name', label: 'الزبون' },
+                            { key: 'serviceType', label: 'الخدمة' },
+                            { key: 'status', label: 'الحالة' },
+                            { key: 'notes', label: 'ملاحظات' }
+                        ]}
+                        label="تصدير"
+                    />
                 </div>
                 <button
                     onClick={() => handleDateClick(new Date())}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { Plus, Edit2, Trash2, Search, Eye, DollarSign } from 'lucide-react';
 import Modal from '../components/Modal';
+import ExportMenu from '../components/ExportMenu';
 
 const Customers = () => {
     const [customers, setCustomers] = useState<any[]>([]);
@@ -154,14 +155,28 @@ const Customers = () => {
         <div>
             {loading && <div className="text-center p-4">جاري التحميل...</div>}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div className="relative w-full md:w-96 group">
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="بحث عن زبون..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                <div className="flex gap-2 w-full md:w-auto items-center">
+                    <div className="relative w-full md:w-96 group">
+                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="بحث عن زبون..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pr-12 pl-4 py-3 bg-white dark:bg-gray-800 border border-transparent shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        />
+                    </div>
+                    <ExportMenu
+                        data={filteredCustomers}
+                        fileName="customers"
+                        columns={[
+                            { key: 'name', label: 'الاسم' },
+                            { key: 'address', label: 'العنوان' },
+                            { key: 'totalSales', label: 'إجمالي المبيعات', formatter: (val) => val?.toLocaleString() || '0' },
+                            { key: 'totalPaid', label: 'إجمالي المدفوع', formatter: (val) => val?.toLocaleString() || '0' },
+                            { key: 'totalRest', label: 'الباقي', formatter: (val) => val?.toLocaleString() || '0' }
+                        ]}
+                        label="تصدير"
                     />
                 </div>
                 <button
