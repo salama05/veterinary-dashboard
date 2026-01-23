@@ -53,9 +53,9 @@ export const createSale = async (req: Request, res: Response) => {
         // Update Customer Balance
         const customerDoc = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (customerDoc) {
-            customerDoc.totalSales += total;
-            customerDoc.totalPaid += paidAmount;
-            customerDoc.totalRest += rest;
+            customerDoc.totalSales = (customerDoc.totalSales || 0) + total;
+            customerDoc.totalPaid = (customerDoc.totalPaid || 0) + paidAmount;
+            customerDoc.totalRest = (customerDoc.totalRest || 0) + rest;
             await customerDoc.save();
         }
 
@@ -94,9 +94,9 @@ export const updateSale = async (req: Request, res: Response) => {
         if (oldSale.customer) {
             const oldCustomer = await Customer.findOne({ _id: oldSale.customer, clinicId: (req as any).user.clinicId });
             if (oldCustomer) {
-                oldCustomer.totalSales -= oldSale.total;
-                oldCustomer.totalPaid -= oldSale.paid;
-                oldCustomer.totalRest -= oldSale.rest;
+                oldCustomer.totalSales = Math.max(0, (oldCustomer.totalSales || 0) - oldSale.total);
+                oldCustomer.totalPaid = Math.max(0, (oldCustomer.totalPaid || 0) - oldSale.paid);
+                oldCustomer.totalRest = Math.max(0, (oldCustomer.totalRest || 0) - oldSale.rest);
                 await oldCustomer.save();
             }
         }
@@ -129,9 +129,9 @@ export const updateSale = async (req: Request, res: Response) => {
         // Update new customer balance
         const newCustomer = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (newCustomer) {
-            newCustomer.totalSales += total;
-            newCustomer.totalPaid += paidAmount;
-            newCustomer.totalRest += rest;
+            newCustomer.totalSales = (newCustomer.totalSales || 0) + total;
+            newCustomer.totalPaid = (newCustomer.totalPaid || 0) + paidAmount;
+            newCustomer.totalRest = (newCustomer.totalRest || 0) + rest;
             await newCustomer.save();
         }
 
@@ -163,9 +163,9 @@ export const deleteSale = async (req: Request, res: Response) => {
         if (sale.customer) {
             const customer = await Customer.findOne({ _id: sale.customer, clinicId: (req as any).user.clinicId });
             if (customer) {
-                customer.totalSales -= sale.total;
-                customer.totalPaid -= sale.paid;
-                customer.totalRest -= sale.rest;
+                customer.totalSales = Math.max(0, (customer.totalSales || 0) - sale.total);
+                customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - sale.paid);
+                customer.totalRest = Math.max(0, (customer.totalRest || 0) - sale.rest);
                 await customer.save();
             }
         }

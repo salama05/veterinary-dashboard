@@ -49,9 +49,12 @@ export const createPurchase = async (req: Request, res: Response) => {
         // Update Supplier Balance
         const supplierDoc = await Supplier.findOne({ _id: supplier, clinicId: (req as any).user.clinicId });
         if (supplierDoc) {
-            supplierDoc.totalPurchases += total;
-            supplierDoc.totalRest += total; // Assuming credit purchase initially
+            supplierDoc.totalPurchases = (supplierDoc.totalPurchases || 0) + total;
+            supplierDoc.totalRest = (supplierDoc.totalRest || 0) + total;
             await supplierDoc.save();
+            console.log(`Updated supplier ${supplierDoc.name}: TotalPurchases=${supplierDoc.totalPurchases}, TotalRest=${supplierDoc.totalRest}`);
+        } else {
+            console.warn(`Supplier ${supplier} not found for clinic ${(req as any).user.clinicId}`);
         }
 
         res.status(201).json(savedPurchase);
@@ -77,9 +80,8 @@ export const deletePurchase = async (req: Request, res: Response) => {
         // Revert Supplier Balance
         const supplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (supplier) {
-            supplier.totalPurchases -= purchase.total;
-            // Assuming we also revert the debt (Rest)
-            supplier.totalRest -= purchase.total;
+            supplier.totalPurchases = Math.max(0, (supplier.totalPurchases || 0) - purchase.total);
+            supplier.totalRest = Math.max(0, (supplier.totalRest || 0) - purchase.total);
             await supplier.save();
         }
 
@@ -111,8 +113,8 @@ export const updatePurchase = async (req: Request, res: Response) => {
 
         const oldSupplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (oldSupplier) {
-            oldSupplier.totalPurchases -= purchase.total;
-            oldSupplier.totalRest -= purchase.total;
+            oldSupplier.totalPurchases = Math.max(0, (oldSupplier.totalPurchases || 0) - purchase.total);
+            oldSupplier.totalRest = Math.max(0, (oldSupplier.totalRest || 0) - purchase.total);
             await oldSupplier.save();
         }
 
@@ -126,8 +128,8 @@ export const updatePurchase = async (req: Request, res: Response) => {
 
         const newSupplier = await Supplier.findOne({ _id: supplierId, clinicId: (req as any).user.clinicId });
         if (newSupplier) {
-            newSupplier.totalPurchases += newTotal;
-            newSupplier.totalRest += newTotal;
+            newSupplier.totalPurchases = (newSupplier.totalPurchases || 0) + newTotal;
+            newSupplier.totalRest = (newSupplier.totalRest || 0) + newTotal;
             await newSupplier.save();
         }
 
