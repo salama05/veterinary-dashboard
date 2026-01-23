@@ -6,6 +6,7 @@ export const getProducts = async (req: Request, res: Response) => {
         const products = await Product.find({ clinicId: (req as any).user.clinicId });
         res.json(products);
     } catch (error) {
+        console.error('Get Products Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

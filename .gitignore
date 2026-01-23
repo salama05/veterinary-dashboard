@@ -41,3 +41,10 @@ Thumbs.db
 data/
 *.db
 *.sqlite
+
+# Debug files
+*.json
+!package.json
+!tsconfig.json
+!composer.json
+!*.md

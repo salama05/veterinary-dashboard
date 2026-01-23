@@ -109,6 +109,9 @@ const Layout = () => {
                         <div className={`overflow-hidden transition-all duration-200 ${!sidebarOpen && 'hidden w-0'}`}>
                             <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{user.username}</p>
                             <p className="text-xs text-gray-500 truncate capitalize">{user.role}</p>
+                            <div className="mt-1 px-2 py-0.5 bg-primary/10 rounded text-[10px] text-primary font-mono truncate">
+                                عيادة: {user.clinicId}
+                            </div>
                         </div>
                     </div>
                     <button
@@ -184,6 +187,9 @@ const Layout = () => {
                         <div className="overflow-hidden">
                             <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{user.username}</p>
                             <p className="text-xs text-gray-500 truncate capitalize">{user.role}</p>
+                            <div className="mt-1 px-2 py-0.5 bg-primary/10 rounded text-[10px] text-primary font-mono truncate">
+                                عيادة: {user.clinicId}
+                            </div>
                         </div>
                     </div>
                     <button

@@ -72,6 +72,18 @@ const Login = () => {
                         دخول
                     </button>
                 </form>
+
+                <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600">
+                        ليس لديك حساب؟{' '}
+                        <button
+                            onClick={() => navigate('/register')}
+                            className="text-primary font-bold hover:underline"
+                        >
+                            إنشاء حساب جديد
+                        </button>
+                    </p>
+                </div>
             </div>
         </div>
     );

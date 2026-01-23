@@ -66,6 +66,8 @@ export const getDashboardStats = async (req: Request, res: Response) => {
             }
         });
     } catch (error) {
+        console.error('Dashboard Stats Error:', error);
+        console.error('User Context:', (req as any).user);
         res.status(500).json({ message: 'Server Error' });
     }
 };
