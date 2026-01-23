@@ -10,7 +10,13 @@ const generateToken = (id: string, role: string, clinicId: string) => {
 };
 
 export const registerUser = async (req: Request, res: Response) => {
-    const { username, password, role } = req.body;
+    const { username, password, role, inviteCode } = req.body;
+
+    // Security Check: Registration Code
+    const requiredCode = process.env.REGISTRATION_CODE;
+    if (requiredCode && inviteCode !== requiredCode) {
+        return res.status(401).json({ message: 'Invalid or missing registration code' });
+    }
 
     try {
         const userExists = await User.findOne({ username });
