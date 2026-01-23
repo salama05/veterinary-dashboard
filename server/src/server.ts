@@ -24,6 +24,20 @@ const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/salama_vet'
 mongoose.connect(mongoURI)
     .then(async () => {
         console.log('MongoDB Connected');
+
+        // One-time Index Drop: Clear stale unique constraints that prevent multi-tenancy
+        try {
+            const db = mongoose.connection.db;
+            if (db) {
+                // Ignore errors if index doesn't exist
+                await db.collection('suppliers').dropIndex('name_1').catch(() => { });
+                await db.collection('customers').dropIndex('name_1').catch(() => { });
+                console.log('✅ Stale unique indexes cleaned up');
+            }
+        } catch (err) {
+            console.warn('⚠️ Could not clean up indexes (they may not exist)');
+        }
+
         // Auto-seed removed for security as per user request
         console.log('Database ready');
     })

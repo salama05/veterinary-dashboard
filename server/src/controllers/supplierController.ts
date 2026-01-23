@@ -16,7 +16,11 @@ export const createSupplier = async (req: Request, res: Response) => {
         const createdSupplier = await supplier.save();
         res.status(201).json(createdSupplier);
     } catch (error) {
-        res.status(400).json({ message: 'Invalid supplier data' });
+        console.error('Create Supplier Error:', error);
+        res.status(400).json({
+            message: 'Invalid supplier data',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 };
 
