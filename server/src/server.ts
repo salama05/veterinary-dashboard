@@ -24,32 +24,8 @@ const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/salama_vet'
 mongoose.connect(mongoURI)
     .then(async () => {
         console.log('MongoDB Connected');
-        // Auto-seed admin user if no users exist
-        try {
-            const userCount = await User.countDocuments();
-            if (userCount === 0) {
-                const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-                const adminPassword = process.env.ADMIN_PASSWORD;
-                const adminClinicId = process.env.ADMIN_CLINIC_ID || 'default-clinic-id';
-
-                if (!adminPassword) {
-                    console.warn('⚠️  ADMIN_PASSWORD not set in environment variables. Skipping admin user creation.');
-                    return;
-                }
-
-                const salt = await bcrypt.genSalt(10);
-                const passwordHash = await bcrypt.hash(adminPassword, salt);
-                await User.create({
-                    username: adminUsername,
-                    passwordHash,
-                    role: 'admin',
-                    clinicId: adminClinicId
-                });
-                console.log(`✅ Default admin user created: ${adminUsername}`);
-            }
-        } catch (seedErr) {
-            console.error('Error seeding admin user:', seedErr);
-        }
+        // Auto-seed removed for security as per user request
+        console.log('Database ready');
     })
     .catch((err) => {
         console.error('MongoDB Connection Error:', err);
