@@ -59,6 +59,11 @@ mongoose.connect(mongoURI)
                     customer.totalPaid = (customer.payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
                     customer.totalRest = (customer.totalSales + customer.totalTreatments) - customer.totalPaid;
 
+                    // Legacy Data Fix: Ensure clinicId exists to pass validation
+                    if (!customer.clinicId) {
+                        customer.clinicId = 'default-clinic-id';
+                    }
+
                     await customer.save();
                 }
 
@@ -70,6 +75,11 @@ mongoose.connect(mongoURI)
                     supplier.totalPurchases = purchases.reduce((sum, p) => sum + (p.total || 0), 0);
                     supplier.totalPaid = (supplier.payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
                     supplier.totalRest = supplier.totalPurchases - supplier.totalPaid;
+
+                    // Legacy Data Fix: Ensure clinicId exists to pass validation
+                    if (!supplier.clinicId) {
+                        supplier.clinicId = 'default-clinic-id';
+                    }
 
                     await supplier.save();
                 }
