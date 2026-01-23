@@ -8,6 +8,7 @@ export interface IOpeningStock extends Document {
     expiryDate?: Date;
     source: string;
     price?: number;
+    clinicId: string;
 }
 
 const OpeningStockSchema: Schema = new Schema({
@@ -18,6 +19,7 @@ const OpeningStockSchema: Schema = new Schema({
     expiryDate: { type: Date },
     source: { type: String, required: true },
     price: { type: Number },
+    clinicId: { type: String, required: true },
 }, { timestamps: true });
 
 export default mongoose.model<IOpeningStock>('OpeningStock', OpeningStockSchema);

@@ -4,7 +4,7 @@ import Product from '../models/Product';
 
 export const getConsumedProducts = async (req: Request, res: Response) => {
     try {
-        const items = await ConsumedProduct.find({}).populate('product', 'name').sort({ date: -1 });
+        const items = await ConsumedProduct.find({ clinicId: (req as any).user.clinicId }).populate('product', 'name').sort({ date: -1 });
         res.json(items);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -24,7 +24,7 @@ export const createConsumedProduct = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Quantity must be greater than 0' });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, clinicId: (req as any).user.clinicId });
         if (!product) {
             console.log(`Product with ID ${productId} not found`);
             return res.status(422).json({ message: 'Product not found in database' });
@@ -41,6 +41,7 @@ export const createConsumedProduct = async (req: Request, res: Response) => {
             productName: product.name,
             quantity: qty,
             notes,
+            clinicId: (req as any).user.clinicId,
         });
 
         const saved = await consumed.save();
@@ -64,7 +65,7 @@ export const updateConsumedProduct = async (req: Request, res: Response) => {
         const { date, product: productId, quantity, notes } = req.body;
         const newQty = Number(quantity);
 
-        const oldRecord = await ConsumedProduct.findById(id);
+        const oldRecord = await ConsumedProduct.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!oldRecord) {
             return res.status(404).json({ message: 'Consumed product record not found' });
         }
@@ -75,14 +76,14 @@ export const updateConsumedProduct = async (req: Request, res: Response) => {
         // If product changed
         if (oldProductId !== productId) {
             // Revert old product stock
-            const oldProduct = await Product.findById(oldProductId);
+            const oldProduct = await Product.findOne({ _id: oldProductId, clinicId: (req as any).user.clinicId });
             if (oldProduct) {
                 oldProduct.quantity += oldQty;
                 await oldProduct.save();
             }
 
             // Deduct from new product stock
-            const newProduct = await Product.findById(productId);
+            const newProduct = await Product.findOne({ _id: productId, clinicId: (req as any).user.clinicId });
             if (!newProduct) {
                 return res.status(422).json({ message: 'New product not found' });
             }
@@ -96,7 +97,7 @@ export const updateConsumedProduct = async (req: Request, res: Response) => {
             oldRecord.productName = newProduct.name;
         } else {
             // Same product, adjust quantity difference
-            const product = await Product.findById(oldProductId);
+            const product = await Product.findOne({ _id: oldProductId, clinicId: (req as any).user.clinicId });
             if (!product) {
                 return res.status(422).json({ message: 'Product not found' });
             }
@@ -125,12 +126,12 @@ export const updateConsumedProduct = async (req: Request, res: Response) => {
 export const deleteConsumedProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const record = await ConsumedProduct.findById(id);
+        const record = await ConsumedProduct.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        const product = await Product.findById(record.product);
+        const product = await Product.findOne({ _id: record.product, clinicId: (req as any).user.clinicId });
         if (product) {
             product.quantity += record.quantity;
             await product.save();

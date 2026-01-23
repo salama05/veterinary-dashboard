@@ -5,7 +5,7 @@ import Supplier from '../models/Supplier';
 
 export const getPurchases = async (req: Request, res: Response) => {
     try {
-        const purchases = await Purchase.find({})
+        const purchases = await Purchase.find({ clinicId: (req as any).user.clinicId })
             .populate('product', 'name')
             .populate('supplier', 'name');
         res.json(purchases);
@@ -29,12 +29,13 @@ export const createPurchase = async (req: Request, res: Response) => {
             supplier,
             expiryDate,
             date: date || new Date(),
+            clinicId: (req as any).user.clinicId,
         });
 
         const savedPurchase = await purchase.save();
 
         // Update Product Stock
-        const productDoc = await Product.findById(product);
+        const productDoc = await Product.findOne({ _id: product, clinicId: (req as any).user.clinicId });
         if (productDoc) {
             productDoc.quantity += qty;
             // Update price if needed? Or just keep latest. 
@@ -46,7 +47,7 @@ export const createPurchase = async (req: Request, res: Response) => {
         }
 
         // Update Supplier Balance
-        const supplierDoc = await Supplier.findById(supplier);
+        const supplierDoc = await Supplier.findOne({ _id: supplier, clinicId: (req as any).user.clinicId });
         if (supplierDoc) {
             supplierDoc.totalPurchases += total;
             supplierDoc.totalRest += total; // Assuming credit purchase initially
@@ -61,20 +62,20 @@ export const createPurchase = async (req: Request, res: Response) => {
 
 export const deletePurchase = async (req: Request, res: Response) => {
     try {
-        const purchase = await Purchase.findById(req.params.id);
+        const purchase = await Purchase.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (!purchase) {
             return res.status(404).json({ message: 'Purchase not found' });
         }
 
         // Revert Product Stock
-        const product = await Product.findById(purchase.product);
+        const product = await Product.findOne({ _id: purchase.product, clinicId: (req as any).user.clinicId });
         if (product) {
             product.quantity -= purchase.quantity;
             await product.save();
         }
 
         // Revert Supplier Balance
-        const supplier = await Supplier.findById(purchase.supplier);
+        const supplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (supplier) {
             supplier.totalPurchases -= purchase.total;
             // Assuming we also revert the debt (Rest)
@@ -91,7 +92,7 @@ export const deletePurchase = async (req: Request, res: Response) => {
 
 export const updatePurchase = async (req: Request, res: Response) => {
     try {
-        const purchase = await Purchase.findById(req.params.id);
+        const purchase = await Purchase.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (!purchase) {
             return res.status(404).json({ message: 'Purchase not found' });
         }
@@ -102,13 +103,13 @@ export const updatePurchase = async (req: Request, res: Response) => {
         const newTotal = newQty * newCost;
 
         // 1. Revert Old Effects
-        const oldProduct = await Product.findById(purchase.product);
+        const oldProduct = await Product.findOne({ _id: purchase.product, clinicId: (req as any).user.clinicId });
         if (oldProduct) {
             oldProduct.quantity -= purchase.quantity;
             await oldProduct.save();
         }
 
-        const oldSupplier = await Supplier.findById(purchase.supplier);
+        const oldSupplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (oldSupplier) {
             oldSupplier.totalPurchases -= purchase.total;
             oldSupplier.totalRest -= purchase.total;
@@ -116,14 +117,14 @@ export const updatePurchase = async (req: Request, res: Response) => {
         }
 
         // 2. Apply New Effects
-        const newProduct = await Product.findById(productId);
+        const newProduct = await Product.findOne({ _id: productId, clinicId: (req as any).user.clinicId });
         if (newProduct) {
             newProduct.quantity += newQty;
             if (expiryDate) newProduct.expiryDate = expiryDate;
             await newProduct.save();
         }
 
-        const newSupplier = await Supplier.findById(supplierId);
+        const newSupplier = await Supplier.findOne({ _id: supplierId, clinicId: (req as any).user.clinicId });
         if (newSupplier) {
             newSupplier.totalPurchases += newTotal;
             newSupplier.totalRest += newTotal;

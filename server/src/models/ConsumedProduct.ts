@@ -6,6 +6,7 @@ export interface IConsumedProduct extends Document {
     productName: string;
     quantity: number;
     notes?: string;
+    clinicId: string;
 }
 
 const ConsumedProductSchema: Schema = new Schema({
@@ -14,6 +15,7 @@ const ConsumedProductSchema: Schema = new Schema({
     productName: { type: String, required: true },
     quantity: { type: Number, required: true },
     notes: { type: String },
+    clinicId: { type: String, required: true },
 }, { timestamps: true });
 
 export default mongoose.model<IConsumedProduct>('ConsumedProduct', ConsumedProductSchema);

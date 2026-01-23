@@ -4,7 +4,7 @@ import Customer from '../models/Customer';
 
 export const getTreatments = async (req: Request, res: Response) => {
     try {
-        const treatments = await Treatment.find({}).populate('customer', 'name');
+        const treatments = await Treatment.find({ clinicId: (req as any).user.clinicId }).populate('customer', 'name');
         res.json(treatments);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -29,12 +29,13 @@ export const createTreatment = async (req: Request, res: Response) => {
             paid: paidAmount,
             rest,
             date: date || new Date(),
+            clinicId: (req as any).user.clinicId,
         });
 
         const savedTreatment = await treatment.save();
 
         // Update Customer Balance (Treatment is also a debt increase)
-        const customerDoc = await Customer.findById(customer);
+        const customerDoc = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (customerDoc) {
             // Assuming Treatment counts towards Total Sales or we might want a separate "Total Treatments" field?
             // For simplicity/requirement "Customer: Total Sales", I'll add to Total Sales value.
@@ -55,7 +56,7 @@ export const updateTreatment = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { treatmentName, quantity, price, customer, paid, date } = req.body;
 
-        const oldTreatment = await Treatment.findById(id);
+        const oldTreatment = await Treatment.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!oldTreatment) {
             return res.status(404).json({ message: 'Treatment not found' });
         }
@@ -68,7 +69,7 @@ export const updateTreatment = async (req: Request, res: Response) => {
 
         // Revert old customer balance
         if (oldTreatment.customer) {
-            const oldCustomer = await Customer.findById(oldTreatment.customer);
+            const oldCustomer = await Customer.findOne({ _id: oldTreatment.customer, clinicId: (req as any).user.clinicId });
             if (oldCustomer) {
                 oldCustomer.totalSales -= oldTreatment.total;
                 oldCustomer.totalPaid -= oldTreatment.paid;
@@ -90,7 +91,7 @@ export const updateTreatment = async (req: Request, res: Response) => {
         const updatedTreatment = await oldTreatment.save();
 
         // Update new customer balance
-        const newCustomer = await Customer.findById(customer);
+        const newCustomer = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (newCustomer) {
             newCustomer.totalSales += total;
             newCustomer.totalPaid += paidAmount;
@@ -108,14 +109,14 @@ export const deleteTreatment = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const treatment = await Treatment.findById(id);
+        const treatment = await Treatment.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!treatment) {
             return res.status(404).json({ message: 'Treatment not found' });
         }
 
         // Revert customer balance
         if (treatment.customer) {
-            const customer = await Customer.findById(treatment.customer);
+            const customer = await Customer.findOne({ _id: treatment.customer, clinicId: (req as any).user.clinicId });
             if (customer) {
                 customer.totalSales -= treatment.total;
                 customer.totalPaid -= treatment.paid;
@@ -124,7 +125,7 @@ export const deleteTreatment = async (req: Request, res: Response) => {
             }
         }
 
-        await Treatment.findByIdAndDelete(id);
+        await Treatment.findOneAndDelete({ _id: id, clinicId: (req as any).user.clinicId });
         res.json({ message: 'Treatment deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

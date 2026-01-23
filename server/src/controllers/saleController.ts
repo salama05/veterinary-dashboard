@@ -5,7 +5,7 @@ import Customer from '../models/Customer';
 
 export const getSales = async (req: Request, res: Response) => {
     try {
-        const sales = await Sale.find({})
+        const sales = await Sale.find({ clinicId: (req as any).user.clinicId })
             .populate('product', 'name')
             .populate('customer', 'name');
         res.json(sales);
@@ -24,7 +24,7 @@ export const createSale = async (req: Request, res: Response) => {
         const rest = total - paidAmount;
 
         // Check Stock
-        const productDoc = await Product.findById(product);
+        const productDoc = await Product.findOne({ _id: product, clinicId: (req as any).user.clinicId });
         if (!productDoc) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -41,6 +41,7 @@ export const createSale = async (req: Request, res: Response) => {
             paid: paidAmount,
             rest,
             date: date || new Date(),
+            clinicId: (req as any).user.clinicId,
         });
 
         const savedSale = await sale.save();
@@ -50,7 +51,7 @@ export const createSale = async (req: Request, res: Response) => {
         await productDoc.save();
 
         // Update Customer Balance
-        const customerDoc = await Customer.findById(customer);
+        const customerDoc = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (customerDoc) {
             customerDoc.totalSales += total;
             customerDoc.totalPaid += paidAmount;
@@ -69,7 +70,7 @@ export const updateSale = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { product, quantity, price, customer, paid, date } = req.body;
 
-        const oldSale = await Sale.findById(id);
+        const oldSale = await Sale.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!oldSale) {
             return res.status(404).json({ message: 'Sale not found' });
         }
@@ -82,7 +83,7 @@ export const updateSale = async (req: Request, res: Response) => {
 
         // Revert old product stock
         if (oldSale.product) {
-            const oldProduct = await Product.findById(oldSale.product);
+            const oldProduct = await Product.findOne({ _id: oldSale.product, clinicId: (req as any).user.clinicId });
             if (oldProduct) {
                 oldProduct.quantity += oldSale.quantity; // Add back old quantity
                 await oldProduct.save();
@@ -91,7 +92,7 @@ export const updateSale = async (req: Request, res: Response) => {
 
         // Revert old customer balance
         if (oldSale.customer) {
-            const oldCustomer = await Customer.findById(oldSale.customer);
+            const oldCustomer = await Customer.findOne({ _id: oldSale.customer, clinicId: (req as any).user.clinicId });
             if (oldCustomer) {
                 oldCustomer.totalSales -= oldSale.total;
                 oldCustomer.totalPaid -= oldSale.paid;
@@ -101,7 +102,7 @@ export const updateSale = async (req: Request, res: Response) => {
         }
 
         // Check new product stock
-        const newProduct = await Product.findById(product);
+        const newProduct = await Product.findOne({ _id: product, clinicId: (req as any).user.clinicId });
         if (!newProduct) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -126,7 +127,7 @@ export const updateSale = async (req: Request, res: Response) => {
         await newProduct.save();
 
         // Update new customer balance
-        const newCustomer = await Customer.findById(customer);
+        const newCustomer = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (newCustomer) {
             newCustomer.totalSales += total;
             newCustomer.totalPaid += paidAmount;
@@ -144,14 +145,14 @@ export const deleteSale = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const sale = await Sale.findById(id);
+        const sale = await Sale.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!sale) {
             return res.status(404).json({ message: 'Sale not found' });
         }
 
         // Revert product stock
         if (sale.product) {
-            const product = await Product.findById(sale.product);
+            const product = await Product.findOne({ _id: sale.product, clinicId: (req as any).user.clinicId });
             if (product) {
                 product.quantity += sale.quantity; // Add back quantity
                 await product.save();
@@ -160,7 +161,7 @@ export const deleteSale = async (req: Request, res: Response) => {
 
         // Revert customer balance
         if (sale.customer) {
-            const customer = await Customer.findById(sale.customer);
+            const customer = await Customer.findOne({ _id: sale.customer, clinicId: (req as any).user.clinicId });
             if (customer) {
                 customer.totalSales -= sale.total;
                 customer.totalPaid -= sale.paid;
@@ -169,7 +170,7 @@ export const deleteSale = async (req: Request, res: Response) => {
             }
         }
 
-        await Sale.findByIdAndDelete(id);
+        await Sale.findOneAndDelete({ _id: id, clinicId: (req as any).user.clinicId });
         res.json({ message: 'Sale deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

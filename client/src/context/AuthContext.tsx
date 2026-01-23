@@ -5,6 +5,7 @@ interface User {
     _id: string;
     username: string;
     role: string;
+    clinicId: string;
     token: string;
 }
 

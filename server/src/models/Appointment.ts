@@ -7,6 +7,7 @@ export interface IAppointment extends Document {
     serviceType: string;
     status: 'Scheduled' | 'Confirmed' | 'Cancelled' | 'Completed';
     notes?: string;
+    clinicId: string;
 }
 
 const AppointmentSchema: Schema = new Schema({
@@ -19,7 +20,8 @@ const AppointmentSchema: Schema = new Schema({
         enum: ['Scheduled', 'Confirmed', 'Cancelled', 'Completed'],
         default: 'Scheduled'
     },
-    notes: { type: String }
+    notes: { type: String },
+    clinicId: { type: String, required: true }
 }, { timestamps: true });
 
 export default mongoose.model<IAppointment>('Appointment', AppointmentSchema);

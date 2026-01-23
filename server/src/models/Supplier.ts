@@ -12,6 +12,7 @@ export interface ISupplier extends Document {
         amount: number;
         notes?: string;
     }[];
+    clinicId: string;
 }
 
 const SupplierSchema: Schema = new Schema({
@@ -25,7 +26,8 @@ const SupplierSchema: Schema = new Schema({
         date: { type: Date, default: Date.now },
         amount: { type: Number, required: true },
         notes: { type: String }
-    }]
+    }],
+    clinicId: { type: String, required: true },
 }, { timestamps: true });
 
 export default mongoose.model<ISupplier>('Supplier', SupplierSchema);

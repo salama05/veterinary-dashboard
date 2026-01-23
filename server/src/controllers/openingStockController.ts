@@ -4,7 +4,7 @@ import Product from '../models/Product';
 
 export const getOpeningStocks = async (req: Request, res: Response) => {
     try {
-        const stocks = await OpeningStock.find({}).populate('product', 'name');
+        const stocks = await OpeningStock.find({ clinicId: (req as any).user.clinicId }).populate('product', 'name');
         res.json(stocks);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -19,7 +19,7 @@ export const createOpeningStock = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Product is required' });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, clinicId: (req as any).user.clinicId });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -31,7 +31,8 @@ export const createOpeningStock = async (req: Request, res: Response) => {
             quantity: Number(quantity),
             expiryDate,
             source,
-            price: price ? Number(price) : undefined
+            price: price ? Number(price) : undefined,
+            clinicId: (req as any).user.clinicId,
         });
 
         const savedStock = await openingStock.save();
@@ -58,7 +59,7 @@ export const updateOpeningStock = async (req: Request, res: Response) => {
         const { openingDate, product: productId, quantity, expiryDate, source, price } = req.body;
         const newQty = Number(quantity);
 
-        const oldRecord = await OpeningStock.findById(id);
+        const oldRecord = await OpeningStock.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!oldRecord) {
             return res.status(404).json({ message: 'Opening stock record not found' });
         }
@@ -69,14 +70,14 @@ export const updateOpeningStock = async (req: Request, res: Response) => {
         // If product changed
         if (oldProductId !== productId) {
             // Revert old product stock
-            const oldProduct = await Product.findById(oldProductId);
+            const oldProduct = await Product.findOne({ _id: oldProductId, clinicId: (req as any).user.clinicId });
             if (oldProduct) {
                 oldProduct.quantity -= oldQty;
                 await oldProduct.save();
             }
 
             // Add to new product stock
-            const newProduct = await Product.findById(productId);
+            const newProduct = await Product.findOne({ _id: productId, clinicId: (req as any).user.clinicId });
             if (!newProduct) {
                 return res.status(422).json({ message: 'New product not found' });
             }
@@ -87,7 +88,7 @@ export const updateOpeningStock = async (req: Request, res: Response) => {
             oldRecord.productName = newProduct.name;
         } else {
             // Same product, adjust quantity difference
-            const product = await Product.findById(oldProductId);
+            const product = await Product.findOne({ _id: oldProductId, clinicId: (req as any).user.clinicId });
             if (!product) {
                 return res.status(422).json({ message: 'Product not found' });
             }
@@ -114,12 +115,12 @@ export const updateOpeningStock = async (req: Request, res: Response) => {
 export const deleteOpeningStock = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const record = await OpeningStock.findById(id);
+        const record = await OpeningStock.findOne({ _id: id, clinicId: (req as any).user.clinicId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        const product = await Product.findById(record.product);
+        const product = await Product.findOne({ _id: record.product, clinicId: (req as any).user.clinicId });
         if (product) {
             product.quantity -= record.quantity;
             await product.save();

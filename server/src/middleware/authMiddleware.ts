@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface AuthRequest extends Request {
-    user?: any;
+    user?: {
+        id: string;
+        role: string;
+        clinicId: string;
+    };
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -14,7 +18,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) => 
     ) {
         try {
             token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string; role: string; clinicId: string };
             req.user = decoded;
             next();
         } catch (error) {

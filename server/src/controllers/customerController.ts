@@ -3,7 +3,8 @@ import Customer from '../models/Customer';
 
 export const getCustomers = async (req: Request, res: Response) => {
     try {
-        let customers = await Customer.find({});
+        const clinicId = (req as any).user.clinicId;
+        let customers = await Customer.find({ clinicId });
 
         // Ensure "زبون عادي" exists
         const regularCustomerName = 'زبون عادي';
@@ -13,10 +14,11 @@ export const getCustomers = async (req: Request, res: Response) => {
             regularCustomer = new Customer({
                 name: regularCustomerName,
                 address: 'إفتراضي',
-                phone: ''
+                phone: '',
+                clinicId
             });
             await regularCustomer.save();
-            customers = await Customer.find({}); // Refresh list
+            customers = await Customer.find({ clinicId }); // Refresh list
         }
 
         res.json(customers);
@@ -27,7 +29,11 @@ export const getCustomers = async (req: Request, res: Response) => {
 
 export const createCustomer = async (req: Request, res: Response) => {
     try {
-        const customer = new Customer(req.body);
+        // Since name must be unique, we should check uniqueness within the clinic if we want per-clinic unique names.
+        // Assuming schema has unique: true on name globally, that might be a problem if different clinics want "Same Name".
+        // We might need to change the schema unique index to compound { name, clinicId }.
+        // For now, let's just create.
+        const customer = new Customer({ ...req.body, clinicId: (req as any).user.clinicId });
         const createdCustomer = await customer.save();
         res.status(201).json(createdCustomer);
     } catch (error: any) {
@@ -40,7 +46,7 @@ export const createCustomer = async (req: Request, res: Response) => {
 
 export const updateCustomer = async (req: Request, res: Response) => {
     try {
-        const customer = await Customer.findById(req.params.id);
+        const customer = await Customer.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (customer) {
             if (customer.name === 'زبون عادي' && req.body.name !== 'زبون عادي') {
                 return res.status(400).json({ message: 'لا يمكن تغيير اسم الزبون العادي' });
@@ -58,7 +64,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
 export const deleteCustomer = async (req: Request, res: Response) => {
     try {
-        const customer = await Customer.findById(req.params.id);
+        const customer = await Customer.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (customer) {
             if (customer.name === 'زبون عادي') {
                 return res.status(400).json({ message: 'لا يمكن حذف الزبون العادي' });
@@ -76,7 +82,7 @@ export const deleteCustomer = async (req: Request, res: Response) => {
 export const addCustomerPayment = async (req: Request, res: Response) => {
     try {
         const { amount, notes, date } = req.body;
-        const customer = await Customer.findById(req.params.id);
+        const customer = await Customer.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
 
         if (customer) {
             const paymentAmount = Number(amount);
@@ -98,7 +104,7 @@ export const updateCustomerPayment = async (req: Request, res: Response) => {
     try {
         const { amount, notes, date } = req.body;
         const { id, paymentId } = req.params;
-        const customer = await Customer.findById(id);
+        const customer = await Customer.findOne({ _id: id, clinicId: (req as any).user.clinicId });
 
         if (customer) {
             const paymentIndex = customer.payments.findIndex(p => (p as any)._id.toString() === paymentId);
@@ -131,7 +137,7 @@ export const updateCustomerPayment = async (req: Request, res: Response) => {
 export const deleteCustomerPayment = async (req: Request, res: Response) => {
     try {
         const { id, paymentId } = req.params;
-        const customer = await Customer.findById(id);
+        const customer = await Customer.findOne({ _id: id, clinicId: (req as any).user.clinicId });
 
         if (customer) {
             const paymentIndex = customer.payments.findIndex(p => (p as any)._id.toString() === paymentId);

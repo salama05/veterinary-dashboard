@@ -3,7 +3,7 @@ import Product from '../models/Product';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
-        const products = await Product.find({});
+        const products = await Product.find({ clinicId: (req as any).user.clinicId });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -12,7 +12,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const getProductById = async (req: Request, res: Response) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (product) {
             res.json(product);
         } else {
@@ -32,18 +32,20 @@ export const createProduct = async (req: Request, res: Response) => {
             expiryDate,
             minLimit,
             price,
+            clinicId: (req as any).user.clinicId,
         });
         const createdProduct = await product.save();
         res.status(201).json(createdProduct);
     } catch (error) {
-        res.status(400).json({ message: 'Invalid product data' });
+        console.error('Create Product Error:', error);
+        res.status(400).json({ message: 'Invalid product data', error });
     }
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
     try {
         const { name, quantity, expiryDate, minLimit, price } = req.body;
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
 
         if (product) {
             product.name = name || product.name;
@@ -64,7 +66,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (product) {
             await product.deleteOne();
             res.json({ message: 'Product removed' });

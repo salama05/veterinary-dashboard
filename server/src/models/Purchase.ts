@@ -8,6 +8,7 @@ export interface IPurchase extends Document {
     total: number;
     supplier: mongoose.Types.ObjectId;
     expiryDate?: Date;
+    clinicId: string;
 }
 
 const PurchaseSchema: Schema = new Schema({
@@ -18,6 +19,7 @@ const PurchaseSchema: Schema = new Schema({
     total: { type: Number, required: true },
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
     expiryDate: { type: Date },
+    clinicId: { type: String, required: true },
 }, { timestamps: true });
 
 export default mongoose.model<IPurchase>('Purchase', PurchaseSchema);

@@ -9,6 +9,7 @@ export interface ITreatment extends Document {
     customer: mongoose.Types.ObjectId;
     paid: number;
     rest: number;
+    clinicId: string;
 }
 
 const TreatmentSchema: Schema = new Schema({
@@ -20,6 +21,7 @@ const TreatmentSchema: Schema = new Schema({
     customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     paid: { type: Number, default: 0 },
     rest: { type: Number, default: 0 },
+    clinicId: { type: String, required: true },
 }, { timestamps: true });
 
 export default mongoose.model<ITreatment>('Treatment', TreatmentSchema);

@@ -14,7 +14,8 @@ export const getAnalysis = async (req: Request, res: Response) => {
         const salesStats = await Sale.aggregate([
             {
                 $match: {
-                    date: { $gte: sixMonthsAgo }
+                    date: { $gte: sixMonthsAgo },
+                    clinicId: (req as any).user.clinicId
                 }
             },
             {
@@ -33,7 +34,8 @@ export const getAnalysis = async (req: Request, res: Response) => {
         const purchasesStats = await Purchase.aggregate([
             {
                 $match: {
-                    date: { $gte: sixMonthsAgo }
+                    date: { $gte: sixMonthsAgo },
+                    clinicId: (req as any).user.clinicId
                 }
             },
             {
@@ -88,6 +90,9 @@ export const getAnalysis = async (req: Request, res: Response) => {
         // 2. Top Performing Products (by Revenue) from Sales
         const topProducts = await Sale.aggregate([
             {
+                $match: { clinicId: (req as any).user.clinicId }
+            },
+            {
                 $group: {
                     _id: "$product",
                     totalRevenue: { $sum: "$total" },
@@ -110,6 +115,9 @@ export const getAnalysis = async (req: Request, res: Response) => {
         // 3. Top Purchased Products
         const topPurchasedProducts = await Purchase.aggregate([
             {
+                $match: { clinicId: (req as any).user.clinicId }
+            },
+            {
                 $group: {
                     _id: "$product",
                     totalQuantity: { $sum: "$quantity" },
@@ -130,6 +138,9 @@ export const getAnalysis = async (req: Request, res: Response) => {
 
         // 4. Most Common Treatments (Proxy for Animal Types)
         const topTreatments = await Treatment.aggregate([
+            {
+                $match: { clinicId: (req as any).user.clinicId }
+            },
             {
                 $group: {
                     _id: "$treatmentName",

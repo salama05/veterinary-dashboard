@@ -5,7 +5,7 @@ import Appointment from '../models/Appointment';
 export const getAppointments = async (req: Request, res: Response) => {
     try {
         const { start, end } = req.query;
-        let query: any = {};
+        let query: any = { clinicId: (req as any).user.clinicId };
 
         if (start && end) {
             query.date = {
@@ -35,7 +35,8 @@ export const createAppointment = async (req: Request, res: Response) => {
             endTime,
             serviceType,
             status,
-            notes
+            notes,
+            clinicId: (req as any).user.clinicId
         });
 
         const populatedAppointment = await newAppointment.populate('customer', 'name phone');
@@ -49,7 +50,11 @@ export const createAppointment = async (req: Request, res: Response) => {
 export const updateAppointment = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const updatedAppointment = await Appointment.findByIdAndUpdate(id, req.body, { new: true })
+        const updatedAppointment = await Appointment.findOneAndUpdate(
+            { _id: id, clinicId: (req as any).user.clinicId },
+            req.body,
+            { new: true }
+        )
             .populate('customer', 'name phone');
 
         if (!updatedAppointment) {
@@ -65,7 +70,7 @@ export const updateAppointment = async (req: Request, res: Response) => {
 export const deleteAppointment = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const deletedAppointment = await Appointment.findByIdAndDelete(id);
+        const deletedAppointment = await Appointment.findOneAndDelete({ _id: id, clinicId: (req as any).user.clinicId });
 
         if (!deletedAppointment) {
             return res.status(404).json({ message: 'Appointment not found' });

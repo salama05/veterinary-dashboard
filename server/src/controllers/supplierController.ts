@@ -3,7 +3,7 @@ import Supplier from '../models/Supplier';
 
 export const getSuppliers = async (req: Request, res: Response) => {
     try {
-        const suppliers = await Supplier.find({});
+        const suppliers = await Supplier.find({ clinicId: (req as any).user.clinicId });
         res.json(suppliers);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -12,7 +12,7 @@ export const getSuppliers = async (req: Request, res: Response) => {
 
 export const createSupplier = async (req: Request, res: Response) => {
     try {
-        const supplier = new Supplier(req.body);
+        const supplier = new Supplier({ ...req.body, clinicId: (req as any).user.clinicId });
         const createdSupplier = await supplier.save();
         res.status(201).json(createdSupplier);
     } catch (error) {
@@ -22,7 +22,7 @@ export const createSupplier = async (req: Request, res: Response) => {
 
 export const updateSupplier = async (req: Request, res: Response) => {
     try {
-        const supplier = await Supplier.findById(req.params.id);
+        const supplier = await Supplier.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (supplier) {
             Object.assign(supplier, req.body);
             const updatedSupplier = await supplier.save();
@@ -37,7 +37,7 @@ export const updateSupplier = async (req: Request, res: Response) => {
 
 export const deleteSupplier = async (req: Request, res: Response) => {
     try {
-        const supplier = await Supplier.findById(req.params.id);
+        const supplier = await Supplier.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
         if (supplier) {
             await supplier.deleteOne();
             res.json({ message: 'Supplier removed' });
@@ -52,7 +52,7 @@ export const deleteSupplier = async (req: Request, res: Response) => {
 export const addSupplierPayment = async (req: Request, res: Response) => {
     try {
         const { amount, notes, date } = req.body;
-        const supplier = await Supplier.findById(req.params.id);
+        const supplier = await Supplier.findOne({ _id: req.params.id, clinicId: (req as any).user.clinicId });
 
         if (supplier) {
             const paymentAmount = Number(amount);
@@ -74,7 +74,7 @@ export const updateSupplierPayment = async (req: Request, res: Response) => {
     try {
         const { amount, notes, date } = req.body;
         const { id, paymentId } = req.params;
-        const supplier = await Supplier.findById(id);
+        const supplier = await Supplier.findOne({ _id: id, clinicId: (req as any).user.clinicId });
 
         if (supplier) {
             const paymentIndex = supplier.payments.findIndex(p => (p as any)._id.toString() === paymentId);
@@ -107,7 +107,7 @@ export const updateSupplierPayment = async (req: Request, res: Response) => {
 export const deleteSupplierPayment = async (req: Request, res: Response) => {
     try {
         const { id, paymentId } = req.params;
-        const supplier = await Supplier.findById(id);
+        const supplier = await Supplier.findOne({ _id: id, clinicId: (req as any).user.clinicId });
 
         if (supplier) {
             const paymentIndex = supplier.payments.findIndex(p => (p as any)._id.toString() === paymentId);

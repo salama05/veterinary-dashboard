@@ -11,18 +11,33 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/salama_vet'
 
 const seedUser = async () => {
     try {
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash('admin123', salt);
+        const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminClinicId = process.env.ADMIN_CLINIC_ID || 'default-clinic-id';
 
-        await User.deleteMany({});
+        if (!adminUsername || !adminPassword) {
+            console.error('❌ ADMIN_USERNAME or ADMIN_PASSWORD not set in environment variables');
+            process.exit(1);
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(adminPassword, salt);
+
+        try {
+            await User.collection.drop();
+        } catch (err) {
+            // Collection might not exist, ignore
+        }
 
         await User.create({
-            username: 'admin',
+            username: adminUsername,
             passwordHash,
-            role: 'admin'
+            role: 'admin',
+            clinicId: adminClinicId
         });
 
-        console.log('Admin user created: admin / admin123');
+        console.log(`✅ Admin user created: ${adminUsername}`);
+        console.log(`   Clinic ID: ${adminClinicId}`);
         process.exit();
     } catch (error) {
         console.error(error);

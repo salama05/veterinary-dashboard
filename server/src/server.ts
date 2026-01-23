@@ -28,14 +28,24 @@ mongoose.connect(mongoURI)
         try {
             const userCount = await User.countDocuments();
             if (userCount === 0) {
+                const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+                const adminPassword = process.env.ADMIN_PASSWORD;
+                const adminClinicId = process.env.ADMIN_CLINIC_ID || 'default-clinic-id';
+
+                if (!adminPassword) {
+                    console.warn('⚠️  ADMIN_PASSWORD not set in environment variables. Skipping admin user creation.');
+                    return;
+                }
+
                 const salt = await bcrypt.genSalt(10);
-                const passwordHash = await bcrypt.hash('admin123', salt);
+                const passwordHash = await bcrypt.hash(adminPassword, salt);
                 await User.create({
-                    username: 'admin',
+                    username: adminUsername,
                     passwordHash,
-                    role: 'admin'
+                    role: 'admin',
+                    clinicId: adminClinicId
                 });
-                console.log('Default admin user created: admin / admin123');
+                console.log(`✅ Default admin user created: ${adminUsername}`);
             }
         } catch (seedErr) {
             console.error('Error seeding admin user:', seedErr);
@@ -63,7 +73,11 @@ import consumedProductRoutes from './routes/consumedProductRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
 import analysisRoutes from './routes/analysisRoutes';
 
-app.use('/api/auth', authRoutes);
+console.log('Mounting Auth Routes at /api/auth');
+app.use('/api/auth', (req, res, next) => {
+    console.log(`[DEBUG] Auth Request: ${req.method} ${req.url}`);
+    next();
+}, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/customers', customerRoutes);
