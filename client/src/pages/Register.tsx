@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
-import { Stethoscope, Building2, UserPlus } from 'lucide-react';
+import { Building2, UserPlus } from 'lucide-react';
 
 const Register = () => {
     const [username, setUsername] = useState('');
