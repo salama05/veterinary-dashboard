@@ -122,9 +122,9 @@ export const updateCustomerPayment = async (req: Request, res: Response) => {
             customer.payments[paymentIndex].notes = notes;
             customer.payments[paymentIndex].date = date || customer.payments[paymentIndex].date;
 
-            // Update balance
-            customer.totalPaid = customer.totalPaid - oldAmount + newAmount;
-            customer.totalRest = customer.totalSales - customer.totalPaid;
+            // Update balance (Sales + Treatments) - Paid
+            customer.totalPaid = (customer.totalPaid || 0) - oldAmount + newAmount;
+            customer.totalRest = ((customer.totalSales || 0) + (customer.totalTreatments || 0)) - customer.totalPaid;
 
             await customer.save();
             res.json(customer);

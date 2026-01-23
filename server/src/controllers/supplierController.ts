@@ -97,8 +97,8 @@ export const updateSupplierPayment = async (req: Request, res: Response) => {
             supplier.payments[paymentIndex].date = date || supplier.payments[paymentIndex].date;
 
             // Update balance
-            supplier.totalPaid = supplier.totalPaid - oldAmount + newAmount;
-            supplier.totalRest = supplier.totalPurchases - supplier.totalPaid;
+            supplier.totalPaid = (supplier.totalPaid || 0) - oldAmount + newAmount;
+            supplier.totalRest = (supplier.totalPurchases || 0) - supplier.totalPaid;
 
             await supplier.save();
             res.json(supplier);
