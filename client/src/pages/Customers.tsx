@@ -172,7 +172,8 @@ const Customers = () => {
                         columns={[
                             { key: 'name', label: 'الاسم' },
                             { key: 'address', label: 'العنوان' },
-                            { key: 'totalSales', label: 'إجمالي المبيعات', formatter: (val) => val?.toLocaleString() || '0' },
+                            { key: 'totalSales', label: 'المبيعات', formatter: (val) => val?.toLocaleString() || '0' },
+                            { key: 'totalTreatments', label: 'العلاجات', formatter: (val) => val?.toLocaleString() || '0' },
                             { key: 'totalPaid', label: 'إجمالي المدفوع', formatter: (val) => val?.toLocaleString() || '0' },
                             { key: 'totalRest', label: 'الباقي', formatter: (val) => val?.toLocaleString() || '0' }
                         ]}
@@ -200,6 +201,7 @@ const Customers = () => {
                                 <th className="p-5 font-bold text-sm">الاسم</th>
                                 <th className="p-5 font-bold text-sm">العنوان</th>
                                 <th className="p-5 font-bold text-sm">إجمالي المبيعات</th>
+                                <th className="p-5 font-bold text-sm">إجمالي العلاجات</th>
                                 <th className="p-5 font-bold text-sm">إجمالي المدفوع</th>
                                 <th className="p-5 font-bold text-sm">الباقي</th>
                                 <th className="p-5 font-bold text-sm">الإجراءات</th>
@@ -211,6 +213,7 @@ const Customers = () => {
                                     <td className="p-5 font-medium text-gray-800 dark:text-white">{customer.name}</td>
                                     <td className="p-5 text-gray-600 dark:text-gray-300">{customer.address}</td>
                                     <td className="p-5 text-blue-600 font-bold">{customer.totalSales?.toLocaleString()}</td>
+                                    <td className="p-5 text-purple-600 font-bold">{customer.totalTreatments?.toLocaleString()}</td>
                                     <td className="p-5 text-emerald-600 font-bold">{customer.totalPaid?.toLocaleString()}</td>
                                     <td className="p-5">
                                         <span className={`px-2 py-1 rounded-md text-xs font-bold ${(customer.totalRest || 0) > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
@@ -318,10 +321,14 @@ const Customers = () => {
                                     <p className="text-sm text-gray-500">الهاتف</p>
                                     <p className="font-medium">{selectedCustomer.phone || '-'}</p>
                                 </div>
-                                <div className="grid grid-cols-3 gap-2 text-center mt-4">
+                                <div className="grid grid-cols-4 gap-2 text-center mt-4">
                                     <div className="p-2 bg-blue-50 rounded">
                                         <p className="text-xs text-blue-600">المبيعات</p>
                                         <p className="font-bold">{selectedCustomer.totalSales?.toLocaleString()}</p>
+                                    </div>
+                                    <div className="p-2 bg-purple-50 rounded">
+                                        <p className="text-xs text-purple-600">العلاجات</p>
+                                        <p className="font-bold">{selectedCustomer.totalTreatments?.toLocaleString() || 0}</p>
                                     </div>
                                     <div className="p-2 bg-green-50 rounded">
                                         <p className="text-xs text-green-600">المدفوع</p>

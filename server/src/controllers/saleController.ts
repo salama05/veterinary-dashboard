@@ -55,7 +55,8 @@ export const createSale = async (req: Request, res: Response) => {
         if (customerDoc) {
             customerDoc.totalSales = (customerDoc.totalSales || 0) + total;
             customerDoc.totalPaid = (customerDoc.totalPaid || 0) + paidAmount;
-            customerDoc.totalRest = customerDoc.totalSales - customerDoc.totalPaid;
+            // Balance = (Sales + Treatments) - Payments
+            customerDoc.totalRest = (customerDoc.totalSales + (customerDoc.totalTreatments || 0)) - customerDoc.totalPaid;
             await customerDoc.save();
         }
 
@@ -96,7 +97,8 @@ export const updateSale = async (req: Request, res: Response) => {
             if (oldCustomer) {
                 oldCustomer.totalSales = Math.max(0, (oldCustomer.totalSales || 0) - oldSale.total);
                 oldCustomer.totalPaid = Math.max(0, (oldCustomer.totalPaid || 0) - oldSale.paid);
-                oldCustomer.totalRest = oldCustomer.totalSales - oldCustomer.totalPaid;
+                // Balance = (Sales + Treatments) - Payments
+                oldCustomer.totalRest = (oldCustomer.totalSales + (oldCustomer.totalTreatments || 0)) - oldCustomer.totalPaid;
                 await oldCustomer.save();
             }
         }
@@ -131,7 +133,8 @@ export const updateSale = async (req: Request, res: Response) => {
         if (newCustomer) {
             newCustomer.totalSales = (newCustomer.totalSales || 0) + total;
             newCustomer.totalPaid = (newCustomer.totalPaid || 0) + paidAmount;
-            newCustomer.totalRest = newCustomer.totalSales - newCustomer.totalPaid;
+            // Balance = (Sales + Treatments) - Payments
+            newCustomer.totalRest = (newCustomer.totalSales + (newCustomer.totalTreatments || 0)) - newCustomer.totalPaid;
             await newCustomer.save();
         }
 
@@ -165,7 +168,8 @@ export const deleteSale = async (req: Request, res: Response) => {
             if (customer) {
                 customer.totalSales = Math.max(0, (customer.totalSales || 0) - sale.total);
                 customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - sale.paid);
-                customer.totalRest = customer.totalSales - customer.totalPaid;
+                // Balance = (Sales + Treatments) - Payments
+                customer.totalRest = (customer.totalSales + (customer.totalTreatments || 0)) - customer.totalPaid;
                 await customer.save();
             }
         }

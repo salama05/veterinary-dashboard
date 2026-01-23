@@ -88,9 +88,9 @@ export const addCustomerPayment = async (req: Request, res: Response) => {
             const paymentAmount = Number(amount);
             customer.payments.push({ amount: paymentAmount, notes, date: date || new Date() });
 
-            // Safe increment and recalculate balance
+            // Safe increment and recalculate balance (Sales + Treatments) - Paid
             customer.totalPaid = (customer.totalPaid || 0) + paymentAmount;
-            customer.totalRest = (customer.totalSales || 0) - customer.totalPaid;
+            customer.totalRest = ((customer.totalSales || 0) + (customer.totalTreatments || 0)) - customer.totalPaid;
 
             await customer.save();
             res.json(customer);
@@ -152,9 +152,9 @@ export const deleteCustomerPayment = async (req: Request, res: Response) => {
             // Remove payment
             customer.payments.splice(paymentIndex, 1);
 
-            // Update balance safely
+            // Update balance safely (Sales + Treatments) - Paid
             customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - amountToRemove);
-            customer.totalRest = (customer.totalSales || 0) - customer.totalPaid;
+            customer.totalRest = ((customer.totalSales || 0) + (customer.totalTreatments || 0)) - customer.totalPaid;
 
             await customer.save();
             res.json(customer);

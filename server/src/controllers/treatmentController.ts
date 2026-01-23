@@ -35,13 +35,13 @@ export const createTreatment = async (req: Request, res: Response) => {
         const savedTreatment = await treatment.save();
 
         // Update Customer Balance (Treatment is also a debt increase)
+        // Update Customer Balance (Treatment increment)
         const customerDoc = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (customerDoc) {
-            // Assuming Treatment counts towards Total Sales or we might want a separate "Total Treatments" field?
-            // For simplicity/requirement "Customer: Total Sales", I'll add to Total Sales value.
-            customerDoc.totalSales += total;
-            customerDoc.totalPaid += paidAmount;
-            customerDoc.totalRest += rest;
+            customerDoc.totalTreatments = (customerDoc.totalTreatments || 0) + total;
+            customerDoc.totalPaid = (customerDoc.totalPaid || 0) + paidAmount;
+            // Balance = (Sales + Treatments) - Payments
+            customerDoc.totalRest = ((customerDoc.totalSales || 0) + customerDoc.totalTreatments) - customerDoc.totalPaid;
             await customerDoc.save();
         }
 
@@ -71,9 +71,9 @@ export const updateTreatment = async (req: Request, res: Response) => {
         if (oldTreatment.customer) {
             const oldCustomer = await Customer.findOne({ _id: oldTreatment.customer, clinicId: (req as any).user.clinicId });
             if (oldCustomer) {
-                oldCustomer.totalSales -= oldTreatment.total;
-                oldCustomer.totalPaid -= oldTreatment.paid;
-                oldCustomer.totalRest -= oldTreatment.rest;
+                oldCustomer.totalTreatments = Math.max(0, (oldCustomer.totalTreatments || 0) - oldTreatment.total);
+                oldCustomer.totalPaid = Math.max(0, (oldCustomer.totalPaid || 0) - oldTreatment.paid);
+                oldCustomer.totalRest = ((oldCustomer.totalSales || 0) + oldCustomer.totalTreatments) - oldCustomer.totalPaid;
                 await oldCustomer.save();
             }
         }
@@ -93,9 +93,9 @@ export const updateTreatment = async (req: Request, res: Response) => {
         // Update new customer balance
         const newCustomer = await Customer.findOne({ _id: customer, clinicId: (req as any).user.clinicId });
         if (newCustomer) {
-            newCustomer.totalSales += total;
-            newCustomer.totalPaid += paidAmount;
-            newCustomer.totalRest += rest;
+            newCustomer.totalTreatments = (newCustomer.totalTreatments || 0) + total;
+            newCustomer.totalPaid = (newCustomer.totalPaid || 0) + paidAmount;
+            newCustomer.totalRest = ((newCustomer.totalSales || 0) + newCustomer.totalTreatments) - newCustomer.totalPaid;
             await newCustomer.save();
         }
 
@@ -118,9 +118,9 @@ export const deleteTreatment = async (req: Request, res: Response) => {
         if (treatment.customer) {
             const customer = await Customer.findOne({ _id: treatment.customer, clinicId: (req as any).user.clinicId });
             if (customer) {
-                customer.totalSales -= treatment.total;
-                customer.totalPaid -= treatment.paid;
-                customer.totalRest -= treatment.rest;
+                customer.totalTreatments = Math.max(0, (customer.totalTreatments || 0) - treatment.total);
+                customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - treatment.paid);
+                customer.totalRest = ((customer.totalSales || 0) + customer.totalTreatments) - customer.totalPaid;
                 await customer.save();
             }
         }

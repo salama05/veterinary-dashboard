@@ -5,6 +5,7 @@ export interface ICustomer extends Document {
     address?: string;
     phone?: string;
     totalSales: number;
+    totalTreatments: number;
     totalPaid: number;
     totalRest: number;
     payments: {
@@ -20,6 +21,7 @@ const CustomerSchema: Schema = new Schema({
     address: { type: String },
     phone: { type: String },
     totalSales: { type: Number, default: 0 },
+    totalTreatments: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
     totalRest: { type: Number, default: 0 },
     payments: [{
