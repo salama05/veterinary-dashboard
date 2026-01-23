@@ -5,6 +5,11 @@ import morgan from 'morgan';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import User from './models/User';
+import Customer from './models/Customer';
+import Supplier from './models/Supplier';
+import Sale from './models/Sale';
+import Treatment from './models/Treatment';
+import Purchase from './models/Purchase';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 
@@ -36,6 +41,47 @@ mongoose.connect(mongoURI)
             }
         } catch (err) {
             console.warn('⚠️ Could not clean up indexes (they may not exist)');
+        }
+
+        // One-time Data Repair: Re-sync all accumulated totals from records
+        const repairDataConsistency = async () => {
+            try {
+                console.log('🔄 Starting full data consistency check...');
+
+                // 1. Repair Customers
+                const customers = await Customer.find({});
+                for (const customer of customers) {
+                    const sales = await Sale.find({ customer: customer._id });
+                    const treatments = await Treatment.find({ customer: customer._id });
+
+                    customer.totalSales = sales.reduce((sum, s) => sum + (s.total || 0), 0);
+                    customer.totalTreatments = treatments.reduce((sum, t) => sum + (t.total || 0), 0);
+                    customer.totalPaid = (customer.payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+                    customer.totalRest = (customer.totalSales + customer.totalTreatments) - customer.totalPaid;
+
+                    await customer.save();
+                }
+
+                // 2. Repair Suppliers
+                const suppliers = await Supplier.find({});
+                for (const supplier of suppliers) {
+                    const purchases = await Purchase.find({ supplier: supplier._id });
+
+                    supplier.totalPurchases = purchases.reduce((sum, p) => sum + (p.total || 0), 0);
+                    supplier.totalPaid = (supplier.payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+                    supplier.totalRest = supplier.totalPurchases - supplier.totalPaid;
+
+                    await supplier.save();
+                }
+
+                console.log('✅ Data consistency repair completed');
+            } catch (err) {
+                console.error('❌ Data repair error:', err);
+            }
+        };
+
+        if (process.env.RUN_REPAIR === 'true') {
+            await repairDataConsistency();
         }
 
         // Auto-seed removed for security as per user request
