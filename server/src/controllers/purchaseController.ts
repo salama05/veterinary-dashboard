@@ -50,7 +50,8 @@ export const createPurchase = async (req: Request, res: Response) => {
         const supplierDoc = await Supplier.findOne({ _id: supplier, clinicId: (req as any).user.clinicId });
         if (supplierDoc) {
             supplierDoc.totalPurchases = (supplierDoc.totalPurchases || 0) + total;
-            supplierDoc.totalRest = (supplierDoc.totalRest || 0) + total;
+            // Always calculate rest as total - paid for consistency
+            supplierDoc.totalRest = supplierDoc.totalPurchases - (supplierDoc.totalPaid || 0);
             await supplierDoc.save();
             console.log(`Updated supplier ${supplierDoc.name}: TotalPurchases=${supplierDoc.totalPurchases}, TotalRest=${supplierDoc.totalRest}`);
         } else {
@@ -81,7 +82,7 @@ export const deletePurchase = async (req: Request, res: Response) => {
         const supplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (supplier) {
             supplier.totalPurchases = Math.max(0, (supplier.totalPurchases || 0) - purchase.total);
-            supplier.totalRest = Math.max(0, (supplier.totalRest || 0) - purchase.total);
+            supplier.totalRest = supplier.totalPurchases - (supplier.totalPaid || 0);
             await supplier.save();
         }
 
@@ -114,7 +115,7 @@ export const updatePurchase = async (req: Request, res: Response) => {
         const oldSupplier = await Supplier.findOne({ _id: purchase.supplier, clinicId: (req as any).user.clinicId });
         if (oldSupplier) {
             oldSupplier.totalPurchases = Math.max(0, (oldSupplier.totalPurchases || 0) - purchase.total);
-            oldSupplier.totalRest = Math.max(0, (oldSupplier.totalRest || 0) - purchase.total);
+            oldSupplier.totalRest = oldSupplier.totalPurchases - (oldSupplier.totalPaid || 0);
             await oldSupplier.save();
         }
 
@@ -129,7 +130,7 @@ export const updatePurchase = async (req: Request, res: Response) => {
         const newSupplier = await Supplier.findOne({ _id: supplierId, clinicId: (req as any).user.clinicId });
         if (newSupplier) {
             newSupplier.totalPurchases = (newSupplier.totalPurchases || 0) + newTotal;
-            newSupplier.totalRest = (newSupplier.totalRest || 0) + newTotal;
+            newSupplier.totalRest = newSupplier.totalPurchases - (newSupplier.totalPaid || 0);
             await newSupplier.save();
         }
 

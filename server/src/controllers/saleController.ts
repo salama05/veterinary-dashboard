@@ -55,7 +55,7 @@ export const createSale = async (req: Request, res: Response) => {
         if (customerDoc) {
             customerDoc.totalSales = (customerDoc.totalSales || 0) + total;
             customerDoc.totalPaid = (customerDoc.totalPaid || 0) + paidAmount;
-            customerDoc.totalRest = (customerDoc.totalRest || 0) + rest;
+            customerDoc.totalRest = customerDoc.totalSales - customerDoc.totalPaid;
             await customerDoc.save();
         }
 
@@ -96,7 +96,7 @@ export const updateSale = async (req: Request, res: Response) => {
             if (oldCustomer) {
                 oldCustomer.totalSales = Math.max(0, (oldCustomer.totalSales || 0) - oldSale.total);
                 oldCustomer.totalPaid = Math.max(0, (oldCustomer.totalPaid || 0) - oldSale.paid);
-                oldCustomer.totalRest = Math.max(0, (oldCustomer.totalRest || 0) - oldSale.rest);
+                oldCustomer.totalRest = oldCustomer.totalSales - oldCustomer.totalPaid;
                 await oldCustomer.save();
             }
         }
@@ -131,7 +131,7 @@ export const updateSale = async (req: Request, res: Response) => {
         if (newCustomer) {
             newCustomer.totalSales = (newCustomer.totalSales || 0) + total;
             newCustomer.totalPaid = (newCustomer.totalPaid || 0) + paidAmount;
-            newCustomer.totalRest = (newCustomer.totalRest || 0) + rest;
+            newCustomer.totalRest = newCustomer.totalSales - newCustomer.totalPaid;
             await newCustomer.save();
         }
 
@@ -165,7 +165,7 @@ export const deleteSale = async (req: Request, res: Response) => {
             if (customer) {
                 customer.totalSales = Math.max(0, (customer.totalSales || 0) - sale.total);
                 customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - sale.paid);
-                customer.totalRest = Math.max(0, (customer.totalRest || 0) - sale.rest);
+                customer.totalRest = customer.totalSales - customer.totalPaid;
                 await customer.save();
             }
         }

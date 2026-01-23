@@ -61,8 +61,10 @@ export const addSupplierPayment = async (req: Request, res: Response) => {
         if (supplier) {
             const paymentAmount = Number(amount);
             supplier.payments.push({ amount: paymentAmount, notes, date: date || new Date() });
-            supplier.totalPaid += paymentAmount;
-            supplier.totalRest -= paymentAmount;
+
+            // Safe increment and recalculate balance
+            supplier.totalPaid = (supplier.totalPaid || 0) + paymentAmount;
+            supplier.totalRest = (supplier.totalPurchases || 0) - supplier.totalPaid;
 
             await supplier.save();
             res.json(supplier);
@@ -124,9 +126,9 @@ export const deleteSupplierPayment = async (req: Request, res: Response) => {
             // Remove payment
             supplier.payments.splice(paymentIndex, 1);
 
-            // Update balance
-            supplier.totalPaid -= amountToRemove;
-            supplier.totalRest = supplier.totalPurchases - supplier.totalPaid;
+            // Update balance safely
+            supplier.totalPaid = Math.max(0, (supplier.totalPaid || 0) - amountToRemove);
+            supplier.totalRest = (supplier.totalPurchases || 0) - supplier.totalPaid;
 
             await supplier.save();
             res.json(supplier);

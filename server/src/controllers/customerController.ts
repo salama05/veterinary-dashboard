@@ -87,8 +87,10 @@ export const addCustomerPayment = async (req: Request, res: Response) => {
         if (customer) {
             const paymentAmount = Number(amount);
             customer.payments.push({ amount: paymentAmount, notes, date: date || new Date() });
-            customer.totalPaid += paymentAmount;
-            customer.totalRest -= paymentAmount;
+
+            // Safe increment and recalculate balance
+            customer.totalPaid = (customer.totalPaid || 0) + paymentAmount;
+            customer.totalRest = (customer.totalSales || 0) - customer.totalPaid;
 
             await customer.save();
             res.json(customer);
@@ -150,9 +152,9 @@ export const deleteCustomerPayment = async (req: Request, res: Response) => {
             // Remove payment
             customer.payments.splice(paymentIndex, 1);
 
-            // Update balance
-            customer.totalPaid -= amountToRemove;
-            customer.totalRest = customer.totalSales - customer.totalPaid;
+            // Update balance safely
+            customer.totalPaid = Math.max(0, (customer.totalPaid || 0) - amountToRemove);
+            customer.totalRest = (customer.totalSales || 0) - customer.totalPaid;
 
             await customer.save();
             res.json(customer);
