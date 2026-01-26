@@ -6,6 +6,7 @@ interface AuthRequest extends Request {
         id: string;
         role: string;
         clinicId: string;
+        username: string;
     };
 }
 
@@ -18,7 +19,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) => 
     ) {
         try {
             token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string; role: string; clinicId: string };
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string; role: string; clinicId: string; username: string };
             req.user = decoded;
             next();
         } catch (error) {

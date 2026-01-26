@@ -73,6 +73,33 @@ const Login = () => {
                     </button>
                 </form>
 
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">أو</span>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => {
+                        const demoUser = import.meta.env.VITE_DEMO_USERNAME || 'demo';
+                        const demoPass = import.meta.env.VITE_DEMO_PASSWORD || 'demo123';
+                        setUsername(demoUser);
+                        setPassword(demoPass);
+                        // Optional: automatically submit
+                        setTimeout(() => {
+                            const submitButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+                            if (submitButton) submitButton.click();
+                        }, 100);
+                    }}
+                    className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg border border-gray-300 transition-colors flex items-center justify-center gap-2"
+                >
+                    <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+                    تجربة العرض التجريبي (Demo)
+                </button>
+
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
                         ليس لديك حساب؟{' '}

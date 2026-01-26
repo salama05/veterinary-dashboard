@@ -118,6 +118,10 @@ import openingStockRoutes from './routes/openingStockRoutes';
 import consumedProductRoutes from './routes/consumedProductRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
 import analysisRoutes from './routes/analysisRoutes';
+import { restrictDemo } from './middleware/demoRestriction';
+
+// Apply Demo Restriction Middleware Globally
+app.use(restrictDemo as any);
 
 console.log('Mounting Auth Routes at /api/auth');
 app.use('/api/auth', (req, res, next) => {

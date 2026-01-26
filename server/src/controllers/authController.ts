@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 
-const generateToken = (id: string, role: string, clinicId: string) => {
-    return jwt.sign({ id, role, clinicId }, process.env.JWT_SECRET || 'secret', {
+const generateToken = (id: string, role: string, clinicId: string, username: string) => {
+    return jwt.sign({ id, role, clinicId, username }, process.env.JWT_SECRET || 'secret', {
         expiresIn: '30d',
     });
 };
@@ -46,7 +46,7 @@ export const registerUser = async (req: Request, res: Response) => {
                 username: user.username,
                 role: user.role,
                 clinicId: user.clinicId,
-                token: generateToken((user._id as unknown) as string, user.role, user.clinicId),
+                token: generateToken((user._id as unknown) as string, user.role, user.clinicId, user.username),
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
@@ -75,7 +75,7 @@ export const loginUser = async (req: Request, res: Response) => {
                 username: user.username,
                 role: user.role,
                 clinicId: user.clinicId,
-                token: generateToken((user._id as unknown) as string, user.role, user.clinicId),
+                token: generateToken((user._id as unknown) as string, user.role, user.clinicId, user.username),
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
