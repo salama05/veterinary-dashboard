@@ -134,7 +134,7 @@ const Layout = () => {
             )}
 
             {/* Mobile Navigation Drawer */}
-            <aside className={`fixed top-0 right-0 h-full w-72 glass border-l border-white/20 transform transition-transform duration-300 z-50 lg:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            <aside className={`fixed top-0 right-0 h-full w-72 glass border-l border-white/20 transform transition-transform duration-300 z-50 lg:hidden flex flex-col ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}>
                 <div className="p-6 flex items-center justify-between border-b border-gray-100/10 dark:border-gray-700/30">
                     <div className="flex items-center gap-3">
