@@ -15,13 +15,15 @@ const setupDemo = async () => {
         const demoClinicId = 'demo-clinic-id';
 
         const userExists = await User.findOne({ username: demoUsername });
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(demoPassword, salt);
 
         if (userExists) {
-            console.log(`ℹ️ Demo user '${demoUsername}' already exists.`);
+            userExists.passwordHash = passwordHash;
+            userExists.clinicId = demoClinicId;
+            await userExists.save();
+            console.log(`✅ Demo user updated: ${demoUsername}`);
         } else {
-            const salt = await bcrypt.genSalt(10);
-            const passwordHash = await bcrypt.hash(demoPassword, salt);
-
             await User.create({
                 username: demoUsername,
                 passwordHash,

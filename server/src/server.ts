@@ -94,7 +94,38 @@ mongoose.connect(mongoURI)
             await repairDataConsistency();
         }
 
-        // Auto-seed removed for security as per user request
+        // Auto-seed Demo User
+        const seedDemoUser = async () => {
+            try {
+                const demoUsername = process.env.DEMO_USERNAME || 'demo';
+                const demoPassword = process.env.DEMO_PASSWORD || 'demo123';
+                const demoClinicId = 'demo-clinic-id';
+
+                const userExists = await User.findOne({ username: demoUsername });
+                const salt = await bcrypt.genSalt(10);
+                const passwordHash = await bcrypt.hash(demoPassword, salt);
+
+                if (!userExists) {
+                    await User.create({
+                        username: demoUsername,
+                        passwordHash,
+                        role: 'demo',
+                        clinicId: demoClinicId
+                    });
+                    console.log(`✅ Demo user created: ${demoUsername}`);
+                } else {
+                    // Update existing demo user to match .env credentials
+                    userExists.passwordHash = passwordHash;
+                    userExists.clinicId = demoClinicId; // Ensure clinicId is correct
+                    await userExists.save();
+                    console.log(`✅ Demo user updated: ${demoUsername}`);
+                }
+            } catch (err) {
+                console.error('❌ Demo seeding error:', err);
+            }
+        };
+
+        await seedDemoUser();
         console.log('Database ready');
     })
     .catch((err) => {
